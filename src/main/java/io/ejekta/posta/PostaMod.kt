@@ -1,9 +1,9 @@
-package com.example
+package io.ejekta.posta
 
 import io.ejekta.kambrik.Kambrik
 import net.fabricmc.api.ModInitializer
 
-class ExampleMod : ModInitializer {
+class PostaMod : ModInitializer {
 
     internal companion object {
         const val ID = "example"

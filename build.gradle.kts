@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
 	kotlin("jvm") version "1.5.30"
 	kotlin("plugin.serialization") version "1.5.30"
-	id("fabric-loom") version "0.8-SNAPSHOT"
+	id("fabric-loom") version "0.9-SNAPSHOT"
 }
 
 // https://modmuss50.me/fabric.html
@@ -23,7 +23,7 @@ object Versions {
 		const val Minecraft = "1.17.1"
 		const val Kotlin = "1.5.30"
 		const val KotlinxXSerialization = "1.2.2"
-		const val Kambrik = "1.0.0"
+		const val Kambrik = "1.1.0"
 	}
 }
 

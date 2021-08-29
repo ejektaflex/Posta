@@ -1,0 +1,12 @@
+{
+	"parent": "block/cube",
+	"textures": {
+		"particle": "posta:block/mailbox",
+		"down": "posta:block/mailbox",
+		"up": "posta:block/mailbox",
+		"north": "posta:block/mailbox",
+		"east": "posta:block/mailbox",
+		"south": "posta:block/mailbox",
+		"west": "posta:block/mailbox"
+	}
+}

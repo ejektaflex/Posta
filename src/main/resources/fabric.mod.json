@@ -20,11 +20,11 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.example.ExampleMod"
+		"io.ejekta.posta.PostaMod"
     ]
   },
   "mixins": [
-    "sample.mixins.json"
+    "posta.mixins.json"
   ],
 
   "depends": {
