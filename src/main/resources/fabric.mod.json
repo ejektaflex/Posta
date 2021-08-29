@@ -22,6 +22,9 @@
     "main": [
 		"io.ejekta.posta.PostaMod"
     ],
+    "client": [
+        "io.ejekta.posta.client.PostaClientMod"
+    ],
     "kambrik": [
       {
         "adapter": "kotlin",
