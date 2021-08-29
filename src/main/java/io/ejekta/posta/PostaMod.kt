@@ -6,7 +6,7 @@ import net.fabricmc.api.ModInitializer
 class PostaMod : ModInitializer {
 
     internal companion object {
-        const val ID = "example"
+        const val ID = "posta"
     }
 
     private val logger = Kambrik.Logging.createLogger(ID)

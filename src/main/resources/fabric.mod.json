@@ -1,26 +1,32 @@
 {
   "schemaVersion": 1,
-  "id": "sample",
+  "id": "posta",
   "version": "${version}",
 
-  "name": "Kambrik Sample Mod",
-  "description": "A Sample Mod for Kambrik",
+  "name": "Posta",
+  "description": "A Mail Mod for Fabric",
   "authors": [
     "Ejektaflex"
   ],
   "contact": {
     "homepage": "None yet",
-    "sources": "https://github.com/ejektaflex/KambrikSampleMod",
-    "issues": "https://github.com/ejektaflex/KambrikSampleMod/issues"
+    "sources": "https://github.com/ejektaflex/Posta",
+    "issues": "https://github.com/ejektaflex/Posta/issues"
   },
 
   "license": "MIT",
-  "icon": "assets/sample/icon.png",
+  "icon": "assets/posta/icon.png",
 
   "environment": "*",
   "entrypoints": {
     "main": [
 		"io.ejekta.posta.PostaMod"
+    ],
+    "kambrik": [
+      {
+        "adapter": "kotlin",
+        "value": "io.ejekta.posta.PostaContent"
+      }
     ]
   },
   "mixins": [
