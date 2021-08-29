@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "sample",
+  "version": "${version}",
+
+  "name": "Kambrik Sample Mod",
+  "description": "A Sample Mod for Kambrik",
+  "authors": [
+    "Ejektaflex"
+  ],
+  "contact": {
+    "homepage": "None yet",
+    "sources": "https://github.com/ejektaflex/KambrikSampleMod",
+    "issues": "https://github.com/ejektaflex/KambrikSampleMod/issues"
+  },
+
+  "license": "MIT",
+  "icon": "assets/sample/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.example.ExampleMod"
+    ]
+  },
+  "mixins": [
+    "sample.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.11.6",
+    "fabric": "*",
+    "minecraft": "1.17.x",
+    "fabric-language-kotlin": ">=1.5.30"
+  },
+  "suggests": {
+    "flamingo": "*"
+  }
+}
