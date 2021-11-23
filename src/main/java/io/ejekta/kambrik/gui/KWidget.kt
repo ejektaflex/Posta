@@ -1,5 +1,7 @@
 package io.ejekta.kambrik.gui
 
+import io.ejekta.kambrik.text.textLiteral
+
 interface KWidget {
 
     val width: Int
@@ -10,6 +12,14 @@ interface KWidget {
         dsl {
             area(width, height) {
                 onDraw(this)
+                if (drawDebug && isHovered) {
+                    rect(0x4287f5, 0x33)
+                    text(0, -9, textLiteral(
+                        "${this@KWidget::class.simpleName ?: "???"} ($width x $height)"
+                    ) {
+                        color = 0x4287f5
+                    })
+                }
             }
         }
     }

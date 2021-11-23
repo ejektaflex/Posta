@@ -20,9 +20,20 @@ open class KTextAreaWidget(
     val renderer: TextRenderer
         get() = MinecraftClient.getInstance().textRenderer
 
+    var cursorColor: Int = 0xFFFFFF
+
     private fun getTextLines(str: String): List<String> {
         return renderer.textHandler.wrapLines(str, width, Style.EMPTY).map {
             it.string
+        }
+    }
+
+    fun getCursorLineAndWidth(str: String): Pair<Int, Int> {
+        val beforeLines = getTextLines(str)
+        return beforeLines.size.coerceAtLeast(1) to if (beforeLines.isEmpty()) {
+            1
+        } else {
+            renderer.getWidth(beforeLines.last())
         }
     }
 
@@ -38,6 +49,7 @@ open class KTextAreaWidget(
             when (keyCode) {
                 InputUtil.GLFW_KEY_LEFT -> cursorPos--
                 InputUtil.GLFW_KEY_RIGHT -> cursorPos++
+                InputUtil.GLFW_KEY_BACKSPACE -> deleteOnce()
             }
         }
         onType = { char, modifiers ->
@@ -53,6 +65,9 @@ open class KTextAreaWidget(
             content.substring(0 until cursorPos)
         }
 
+    val isCursorAtEnd: Boolean
+        get() = cursorBefore == content
+
     private val cursorAfter: String
         get() = if (cursorPos >= content.length) {
             ""
@@ -62,6 +77,18 @@ open class KTextAreaWidget(
 
     val asText: Text
         get() = LiteralText(content)
+
+    private fun deleteOnce() {
+        if (cursorBefore.isEmpty()) {
+            return
+        }
+        if (cursorAfter.isEmpty()) {
+            content = cursorBefore.dropLast(1)
+        } else {
+            content = cursorBefore.dropLast(1) + cursorAfter
+            cursorPos--
+        }
+    }
 
     private fun insert(newStr: String) {
         val potentialContent = withInserted(newStr)
@@ -85,10 +112,14 @@ open class KTextAreaWidget(
     override fun onDraw(area: KGuiDsl.AreaDsl) {
         area {
             reactWith(keyReactor)
-            rect(0x0)
+            rect(0x0) // black bg
             dsl {
                 getTextLines(content).forEachIndexed { i, cText ->
                     text(0, i * lineHeight, LiteralText(cText))
+                }
+                val location = getCursorLineAndWidth(cursorBefore)
+                offset(location.second, (location.first - 1) * lineHeight) {
+                    rect(1, lineHeight, cursorColor)
                 }
             }
         }

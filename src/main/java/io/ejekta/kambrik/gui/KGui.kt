@@ -25,7 +25,7 @@ class KGui(
         logic.areaClickStack.clear()
         logic.keyStack.clear()
         val toDraw = logic.modalStack.lastOrNull() ?: func // Draw top of modal stack, or func if not exists
-        val dsl = KGuiDsl(this, matrices, mouseX, mouseY, delta).draw(toDraw)
+        val dsl = KGuiDsl(this, matrices, mouseX, mouseY, delta, true).draw(toDraw)
     }
 
     fun pushModal(dsl: KGuiDsl.() -> Unit) = logic.modalStack.add(dsl)

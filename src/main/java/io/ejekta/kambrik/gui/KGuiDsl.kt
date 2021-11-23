@@ -22,7 +22,7 @@ import net.minecraft.text.OrderedText
 import net.minecraft.text.Text
 import kotlin.math.max
 
-data class KGuiDsl(val ctx: KGui, val matrices: MatrixStack, val mouseX: Int, val mouseY: Int, val delta: Float?) {
+data class KGuiDsl(val ctx: KGui, val matrices: MatrixStack, val mouseX: Int, val mouseY: Int, val delta: Float?, val drawDebug: Boolean) {
 
     private val frameDeferredTasks = mutableListOf<KGuiDsl.() -> Unit>()
 
@@ -116,6 +116,8 @@ data class KGuiDsl(val ctx: KGui, val matrices: MatrixStack, val mouseX: Int, va
     fun text(x: Int, y: Int, orderedText: OrderedText) {
         ctx.screen.textRenderer.drawWithShadow(matrices, orderedText, ctx.absX(x).toFloat(), ctx.absY(y).toFloat(), 0xFFFFFF)
     }
+
+    fun text(x: Int, y: Int, string: String) = text(x, y, LiteralText(string))
 
     fun text(x: Int = 0, y: Int = 0, textDsl: KambrikTextBuilder<LiteralText>.() -> Unit) {
         text(x, y, textLiteral("", textDsl))

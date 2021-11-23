@@ -49,11 +49,9 @@ class LetterScreen(
     val textArea = KTextAreaWidget(100, 40)
 
     val fgGui = kambrikGui {
-
         offset(200, 200) {
             widget(textArea)
         }
-
     }
 
     override fun onDrawForeground(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float) {
