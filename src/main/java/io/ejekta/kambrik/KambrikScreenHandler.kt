@@ -1,17 +1,16 @@
-package io.ejekta.posta.mailbox
+package io.ejekta.kambrik
 
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.Inventory
-import net.minecraft.inventory.SimpleInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.ScreenHandlerType
 import net.minecraft.screen.slot.Slot
 
-abstract class KambrikScreenHandler<S : ScreenHandler>(type: ScreenHandlerType<S>?, syncId: Int) : ScreenHandler(type, syncId) {
+abstract class KambrikScreenHandler<S : ScreenHandler, INV : Inventory>(type: ScreenHandlerType<S>?, syncId: Int) : ScreenHandler(type, syncId) {
 
-    open var inventory: Inventory = SimpleInventory(0)
+    abstract var inventory: INV
 
     protected fun <I : Inventory, S : Slot> makeSlotGrid(
         inventory: I,

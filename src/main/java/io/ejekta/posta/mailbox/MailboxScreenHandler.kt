@@ -1,5 +1,6 @@
 package io.ejekta.posta.mailbox
 
+import io.ejekta.kambrik.KambrikScreenHandler
 import io.ejekta.posta.PostaContent
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
@@ -12,7 +13,7 @@ class MailboxScreenHandler @JvmOverloads constructor(
     syncId: Int,
     playerInventory: PlayerInventory,
     override var inventory: Inventory
-) : KambrikScreenHandler<MailboxScreenHandler>(PostaContent.MAILBOX_SCREEN_HANDLER, syncId) {
+) : KambrikScreenHandler<MailboxScreenHandler, Inventory>(PostaContent.MAILBOX_SCREEN_HANDLER, syncId) {
 
     constructor(syncId: Int, playerInventory: PlayerInventory, buf: PacketByteBuf) : this(syncId, playerInventory, MailboxInventory())
 

@@ -36,7 +36,12 @@ class KTextBoxWidget(
         get() = if ((MinecraftClient.getInstance().world?.time ?: 0L) % 16L >= 8L) "_" else " "
 
     fun getStringRenderLook(insert: String, delAmt: Int = 0): String {
-        return textString.substring(0 until cursorPos - delAmt) + insert + textString.substring(cursorPos - delAmt until textString.length)
+        return textString
+            .substring(
+                0 until (cursorPos - delAmt).coerceAtLeast(1)
+            ) + insert + textString.substring(
+            cursorPos - delAmt until textString.length.coerceAtLeast(1)
+            )
     }
 
     val textStringLines: List<OrderedText>

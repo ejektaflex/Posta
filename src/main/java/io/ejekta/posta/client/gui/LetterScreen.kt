@@ -1,5 +1,6 @@
 package io.ejekta.posta.client.gui
 
+import io.ejekta.kambrik.KambrikHandledScreen
 import io.ejekta.kambrik.ext.client.drawSimpleCenteredImage
 import io.ejekta.kambrik.text.textLiteral
 import io.ejekta.posta.PostaMod
@@ -17,7 +18,7 @@ class LetterScreen(
     handler: ScreenHandler,
     inventory: PlayerInventory,
     title: Text
-) : HandledScreen<ScreenHandler>(
+) : KambrikHandledScreen<ScreenHandler>(
     handler, inventory, title
 ) {
 
@@ -26,24 +27,37 @@ class LetterScreen(
         backgroundHeight = 246
     }
 
-
     var textField = TextFieldWidget(MinecraftClient.getInstance().textRenderer, 25, 25, 200, 50, textLiteral("Hi!")).apply {
         setEditable(true)
         setMaxLength(50)
     }
 
-    var textTwo = KTextBoxWidget(MinecraftClient.getInstance().textRenderer, 25, 85, 200, 50, textLiteral("Hi!")).apply {
-
-    }
-
     override fun init() {
         addSelectableChild(textField)
         setInitialFocus(textField)
-        addSelectableChild(textTwo)
+        //addSelectableChild(textTwo)
     }
 
     override fun handledScreenTick() {
         textField.tick()
+    }
+
+    override fun onDrawBackground(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float) {
+        //TODO("Not yet implemented")
+    }
+
+    val textArea = KTextAreaWidget(100, 40)
+
+    val fgGui = kambrikGui {
+
+        offset(200, 200) {
+            widget(textArea)
+        }
+
+    }
+
+    override fun onDrawForeground(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float) {
+        fgGui.draw(matrices, mouseX, mouseY, delta)
     }
 
     override fun drawBackground(matrices: MatrixStack, delta: Float, mouseX: Int, mouseY: Int) {
@@ -53,7 +67,7 @@ class LetterScreen(
     override fun render(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float) {
         super.render(matrices, mouseX, mouseY, delta)
         textField.render(matrices, mouseX, mouseY, delta)
-        textTwo.render(matrices, mouseX, mouseY, delta)
+        //textTwo.render(matrices, mouseX, mouseY, delta)
     }
 
     companion object {
