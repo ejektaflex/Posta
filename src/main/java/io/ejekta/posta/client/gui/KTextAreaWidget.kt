@@ -3,45 +3,37 @@ package io.ejekta.posta.client.gui
 import io.ejekta.kambrik.gui.KGuiDsl
 import io.ejekta.kambrik.gui.KWidget
 import io.ejekta.kambrik.gui.reactor.KeyReactor
-import io.ejekta.kambrik.text.textLiteral
-import net.fabricmc.fabric.api.client.screen.v1.Screens
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
-import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.util.InputUtil
-import net.minecraft.text.LiteralText
-import net.minecraft.text.OrderedText
-import net.minecraft.text.Text
-import net.minecraft.util.Formatting
+import net.minecraft.text.*
 
-class KTextAreaWidget(
+open class KTextAreaWidget(
     override val width: Int,
-    override val height: Int,
-    val maxSize: Int,
-    val sizeType: LineBreakType
+    override val height: Int
 ) : KWidget {
 
     var content = "hi"
 
+    var lineHeight = 10
+
     val renderer: TextRenderer
         get() = MinecraftClient.getInstance().textRenderer
 
-    enum class LineBreakType {
-        WIDTH,
-        LINES
+    private fun getTextLines(str: String): List<String> {
+        return renderer.textHandler.wrapLines(str, width, Style.EMPTY).map {
+            it.string
+        }
     }
 
-    fun getTextLines(str: String): MutableList<OrderedText> {
-        val wrapped = renderer.wrapLines(LiteralText(str), 50)
-        return wrapped
-    }
+    private fun getNumLines(str: String) = getTextLines(str).size
 
     var cursorPos: Int = 0
         get() {
             return field.coerceIn(0..content.length)
         }
 
-    val reactor = KeyReactor().apply {
+    val keyReactor = KeyReactor().apply {
         onPressDown = { keyCode, scanCode, modifiers ->
             when (keyCode) {
                 InputUtil.GLFW_KEY_LEFT -> cursorPos--
@@ -54,14 +46,14 @@ class KTextAreaWidget(
         }
     }
 
-    val cursorBefore: String
+    private val cursorBefore: String
         get() = if (cursorPos == 0) {
             ""
         } else {
             content.substring(0 until cursorPos)
         }
 
-    val cursorAfter: String
+    private val cursorAfter: String
         get() = if (cursorPos >= content.length) {
             ""
         } else {
@@ -71,28 +63,32 @@ class KTextAreaWidget(
     val asText: Text
         get() = LiteralText(content)
 
-    fun insert(newStr: String) {
-        content = withInserted(newStr)
+    private fun insert(newStr: String) {
+        val potentialContent = withInserted(newStr)
+
+        // Do not do an insertion if this brings it over the line limit
+        if (getNumLines(potentialContent) > (height / lineHeight)) {
+            return
+        }
+
+        content = potentialContent
         cursorPos += newStr.length
     }
 
-    fun withInserted(insertion: String): String {
+    private fun withInserted(insertion: String): String {
         if (content.isEmpty()) {
             return insertion
         }
         return "$cursorBefore$insertion$cursorAfter"
     }
 
-    val contentDisplay: String
-        get() = withInserted("|")
-
     override fun onDraw(area: KGuiDsl.AreaDsl) {
         area {
-            reactWith(reactor)
+            reactWith(keyReactor)
             rect(0x0)
             dsl {
-                getTextLines(contentDisplay).forEachIndexed { i, cText ->
-                    text(0, i * 9, cText)
+                getTextLines(content).forEachIndexed { i, cText ->
+                    text(0, i * lineHeight, LiteralText(cText))
                 }
             }
         }
