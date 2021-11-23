@@ -111,9 +111,15 @@ interface KambrikSurface : Element {
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
-        println("Key pressed: $keyCode $scanCode $modifiers")
         for (keyReact in keyStack) {
             keyReact.doPress(keyCode, scanCode, modifiers)
+        }
+        return true
+    }
+
+    override fun charTyped(chr: Char, modifiers: Int): Boolean {
+        for (keyReact in keyStack) {
+            keyReact.doType(chr, modifiers)
         }
         return true
     }

@@ -64,6 +64,12 @@ abstract class KambrikHandledScreen<SH : ScreenHandler>(
         return super<HandledScreen>.mouseScrolled(mouseX, mouseY, amount)
     }
 
+
+    override fun charTyped(chr: Char, modifiers: Int): Boolean {
+        super<KambrikSurface>.charTyped(chr, modifiers)
+        return super<HandledScreen>.charTyped(chr, modifiers)
+    }
+
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
         super<KambrikSurface>.keyPressed(keyCode, scanCode, modifiers)
         return super<HandledScreen>.keyPressed(keyCode, scanCode, modifiers)

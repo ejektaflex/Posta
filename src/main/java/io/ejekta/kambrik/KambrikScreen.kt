@@ -44,6 +44,11 @@ abstract class KambrikScreen(title: Text) : Screen(title), KambrikSurface {
         return super<Screen>.keyPressed(keyCode, scanCode, modifiers)
     }
 
+    override fun charTyped(chr: Char, modifiers: Int): Boolean {
+        super<KambrikSurface>.charTyped(chr, modifiers)
+        return super<Screen>.charTyped(chr, modifiers)
+    }
+
     override fun render(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float) {
         onDrawBackground(matrices, mouseX, mouseY, delta)
         super.render(matrices, mouseX, mouseY, delta)

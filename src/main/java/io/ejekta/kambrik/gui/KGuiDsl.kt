@@ -18,6 +18,7 @@ import net.minecraft.entity.EntityType
 import net.minecraft.entity.LivingEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.text.LiteralText
+import net.minecraft.text.OrderedText
 import net.minecraft.text.Text
 import kotlin.math.max
 
@@ -110,6 +111,10 @@ data class KGuiDsl(val ctx: KGui, val matrices: MatrixStack, val mouseX: Int, va
 
     fun text(x: Int, y: Int, text: Text) {
         ctx.screen.textRenderer.drawWithShadow(matrices, text, ctx.absX(x).toFloat(), ctx.absY(y).toFloat(), 0xFFFFFF)
+    }
+
+    fun text(x: Int, y: Int, orderedText: OrderedText) {
+        ctx.screen.textRenderer.drawWithShadow(matrices, orderedText, ctx.absX(x).toFloat(), ctx.absY(y).toFloat(), 0xFFFFFF)
     }
 
     fun text(x: Int = 0, y: Int = 0, textDsl: KambrikTextBuilder<LiteralText>.() -> Unit) {
