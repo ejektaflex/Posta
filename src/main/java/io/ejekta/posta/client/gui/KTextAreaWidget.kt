@@ -3,6 +3,7 @@ package io.ejekta.posta.client.gui
 import io.ejekta.kambrik.gui.KGuiDsl
 import io.ejekta.kambrik.gui.KWidget
 import io.ejekta.kambrik.gui.reactor.KeyReactor
+import io.ejekta.kambrik.gui.reactor.MouseReactor
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.util.InputUtil
@@ -22,13 +23,42 @@ open class KTextAreaWidget(
 
     var cursorColor: Int = 0xFFFFFF
 
+    val keyReactor = KeyReactor().apply {
+        onPressDown = { keyCode, scanCode, modifiers ->
+            when (keyCode) {
+                InputUtil.GLFW_KEY_LEFT -> cursorPos--
+                InputUtil.GLFW_KEY_RIGHT -> cursorPos++
+                InputUtil.GLFW_KEY_BACKSPACE -> deleteOnce()
+            }
+        }
+        onType = { char, modifiers ->
+            insert(char.toString())
+        }
+    }
+
+    val mouseReactor = MouseReactor().apply {
+        onClickDown = { relX, relY, button ->
+            println("$relX, $relY, ${relY/lineHeight}")
+            val lines = getTextLines(content)
+            val lineNum = relY / lineHeight
+            if (lineNum >= lines.size) {
+
+            } else {
+                val line = lines[lineNum]
+                val trimmed = renderer.trimToWidth(line, relX)
+                val prevLines = lines.subList(0, lineNum)
+                cursorPos = prevLines.joinToString("").length + trimmed.length
+            }
+        }
+    }
+
     private fun getTextLines(str: String): List<String> {
         return renderer.textHandler.wrapLines(str, width, Style.EMPTY).map {
             it.string
         }
     }
 
-    fun getCursorLineAndWidth(str: String): Pair<Int, Int> {
+    private fun getCursorLineAndWidth(str: String): Pair<Int, Int> {
         val beforeLines = getTextLines(str)
         return beforeLines.size.coerceAtLeast(1) to if (beforeLines.isEmpty()) {
             1
@@ -43,20 +73,6 @@ open class KTextAreaWidget(
         get() {
             return field.coerceIn(0..content.length)
         }
-
-    val keyReactor = KeyReactor().apply {
-        onPressDown = { keyCode, scanCode, modifiers ->
-            when (keyCode) {
-                InputUtil.GLFW_KEY_LEFT -> cursorPos--
-                InputUtil.GLFW_KEY_RIGHT -> cursorPos++
-                InputUtil.GLFW_KEY_BACKSPACE -> deleteOnce()
-            }
-        }
-        onType = { char, modifiers ->
-            println("Char: $char, Mod: $modifiers")
-            insert(char.toString())
-        }
-    }
 
     private val cursorBefore: String
         get() = if (cursorPos == 0) {
@@ -112,6 +128,7 @@ open class KTextAreaWidget(
     override fun onDraw(area: KGuiDsl.AreaDsl) {
         area {
             reactWith(keyReactor)
+            reactWith(mouseReactor)
             rect(0x0) // black bg
             dsl {
                 getTextLines(content).forEachIndexed { i, cText ->
