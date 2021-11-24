@@ -30,6 +30,10 @@ open class KTextAreaWidget(
             when (keyCode) {
                 InputUtil.GLFW_KEY_LEFT -> cursorPos--
                 InputUtil.GLFW_KEY_RIGHT -> cursorPos++
+                InputUtil.GLFW_KEY_ENTER -> {
+                    content += "\n"
+                    cursorPos++
+                }
                 InputUtil.GLFW_KEY_BACKSPACE -> deleteOnce()
             }
         }
@@ -67,9 +71,15 @@ open class KTextAreaWidget(
     }
 
     private fun getTextLines(str: String): List<String> {
-        return renderer.textHandler.wrapLines(str, width, Style.EMPTY).map {
-            it.string
-        }
+        return str.split("\n").map { splitStr ->
+            if (splitStr.isBlank()) {
+                listOf(splitStr)
+            } else {
+                renderer.textHandler.wrapLines(splitStr, width, Style.EMPTY).map {
+                    it.string
+                }
+            }
+        }.flatten()
     }
 
     private fun doot(lines: List<String>): Pair<Int, Int> {
