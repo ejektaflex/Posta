@@ -49,7 +49,7 @@ class LetterScreen(
     val textArea = KTextAreaWidget(100, 40)
 
     val fgGui = kambrikGui {
-        offset(200, 200) {
+        offset(100, 100) {
             widget(textArea)
         }
     }

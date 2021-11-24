@@ -8,6 +8,8 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.util.InputUtil
 import net.minecraft.text.*
+import kotlin.math.sin
+import kotlin.random.Random
 
 open class KTextAreaWidget(
     override val width: Int,
@@ -36,18 +38,30 @@ open class KTextAreaWidget(
         }
     }
 
+    /*
+
+    abc
+    def
+
+    len: 3,3 = 6
+
+
+
+     */
+
     val mouseReactor = MouseReactor().apply {
         onClickDown = { relX, relY, button ->
-            println("$relX, $relY, ${relY/lineHeight}")
+            println("Content: `$content`")
+            println("LH ${relY/lineHeight}")
             val lines = getTextLines(content)
             val lineNum = relY / lineHeight
-            if (lineNum >= lines.size) {
-
-            } else {
+            if (lineNum < lines.size) {
                 val line = lines[lineNum]
                 val trimmed = renderer.trimToWidth(line, relX)
+                println("$lines - Trimmed: `$trimmed`")
                 val prevLines = lines.subList(0, lineNum)
-                cursorPos = prevLines.joinToString("").length + trimmed.length
+                println("Prev: `$prevLines`")
+                cursorPos = prevLines.map { it.length + 1 }.sum() + trimmed.length
             }
         }
     }
@@ -58,13 +72,41 @@ open class KTextAreaWidget(
         }
     }
 
-    private fun getCursorLineAndWidth(str: String): Pair<Int, Int> {
-        val beforeLines = getTextLines(str)
-        return beforeLines.size.coerceAtLeast(1) to if (beforeLines.isEmpty()) {
-            1
-        } else {
-            renderer.getWidth(beforeLines.last())
+    private fun doot(lines: List<String>): Pair<Int, Int> {
+        var target = cursorPos
+        for (i in lines.indices) {
+            val line = lines[i]
+            if (target > line.length) {
+                target -= line.length + 1
+            } else {
+                return i to target
+            }
         }
+        return lines.lastIndex to (lines.lastOrNull()?.length ?: 0)
+    }
+
+    private fun getCursorLineAndWidth(str: String): Pair<Int, Int> {
+        val allLines = getTextLines(str)
+
+        val beforeAmounts = allLines.map { it.length }
+
+        val res = doot(allLines)
+
+
+        if (Random.nextDouble() < 0.02) {
+            println("Befor: $allLines, ${beforeAmounts} $cursorPos, T${res.first},${res.second}")
+            //println("$lineChs into ${allLines[lineNum]}")
+        }
+
+        if (res.first in allLines.indices) {
+            return if (res.second != 0) {
+                res.first to renderer.getWidth(allLines[res.first].substring(0 until res.second))
+            } else {
+                res.first to 0
+            }
+        }
+
+        return 0 to 0
     }
 
     private fun getNumLines(str: String) = getTextLines(str).size
@@ -134,8 +176,8 @@ open class KTextAreaWidget(
                 getTextLines(content).forEachIndexed { i, cText ->
                     text(0, i * lineHeight, LiteralText(cText))
                 }
-                val location = getCursorLineAndWidth(cursorBefore)
-                offset(location.second, (location.first - 1) * lineHeight) {
+                val location = getCursorLineAndWidth(content)
+                offset(location.second, location.first * lineHeight) {
                     rect(1, lineHeight, cursorColor)
                 }
             }
