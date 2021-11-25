@@ -31,7 +31,7 @@ open class KTextAreaWidget(
                 InputUtil.GLFW_KEY_LEFT -> cursorPos--
                 InputUtil.GLFW_KEY_RIGHT -> cursorPos++
                 InputUtil.GLFW_KEY_ENTER -> {
-                    content += "\n"
+                    insert("\n")
                     cursorPos++
                 }
                 InputUtil.GLFW_KEY_BACKSPACE -> deleteOnce()
@@ -44,18 +44,15 @@ open class KTextAreaWidget(
 
     val mouseReactor = MouseReactor().apply {
         onClickDown = { relX, relY, button ->
-//            println("Content: `$content`")
-//            println("LH ${relY/lineHeight}")
-//            val lines = getTextLines(content)
-//            val lineNum = relY / lineHeight
-//            if (lineNum < lines.size) {
-//                val line = lines[lineNum]
-//                val trimmed = renderer.trimToWidth(line, relX)
-//                println("$lines - Trimmed: `$trimmed`")
-//                val prevLines = lines.subList(0, lineNum)
-//                println("Prev: `$prevLines`")
-//                cursorPos = prevLines.map { it.length + 1 }.sum() + trimmed.length
-//            }
+            val lines = getTextLines(content)
+            val lineNum = relY / lineHeight
+            if (lineNum < lines.size) {
+                val line = lines[lineNum]
+                val trimmed = renderer.trimToWidth(line, relX)
+                val newCharIndex = line.length - trimmed.length
+                val prevLines = lines.subList(0, lineNum)
+                cursorPos = prevLines.sumOf { it.length } + trimmed.length
+            }
         }
     }
 
@@ -71,10 +68,10 @@ open class KTextAreaWidget(
                 StringVisitable.styled(str.substring(start, end), style).string
             )
         }
+        if (str.lastOrNull() == '\n') {
+            list.add("")
+        }
         return list
-//        return str.split("\n").map { splitStr ->
-//
-//        }.flatten()
     }
 
     private fun getLine(lines: List<String>): Pair<Int, Int> {
@@ -88,7 +85,7 @@ open class KTextAreaWidget(
         var target = cursorPos
         for (i in lines.indices) {
             val line = lines[i]
-            if (target > line.length) {
+            if (target >= line.length) {
                 target -= line.length
             } else {
                 return i to target
@@ -105,7 +102,7 @@ open class KTextAreaWidget(
         val res = doot(allLines)
 
         if (Random.nextDouble() < 0.02) {
-            println("DOOT: $allLines, $beforeAmounts $cursorPos, T${res.first},${res.second}")
+            //println("DOOT: $allLines, $beforeAmounts $cursorPos, T${res.first},${res.second}")
             //println("$lineChs into ${allLines[lineNum]}")
         }
 
@@ -158,8 +155,12 @@ open class KTextAreaWidget(
     private fun insert(newStr: String) {
         val potentialContent = withInserted(newStr)
 
+        val supposedLines = getNumLines(potentialContent)
+
+        println("Supposing: $supposedLines against ${height / lineHeight}")
+
         // Do not do an insertion if this brings it over the line limit
-        if (getNumLines(potentialContent) > (height / lineHeight)) {
+        if (supposedLines > (height / lineHeight)) {
             return
         }
 
@@ -184,7 +185,16 @@ open class KTextAreaWidget(
                     text(0, i * lineHeight, LiteralText(cText.trimEnd()))
                 }
                 val location = getCursorLineAndWidth()
-                offset(location.second, location.first * lineHeight) {
+                // IF cursor would
+                var cursorX = location.second
+                var cursorY = location.first * lineHeight
+
+                if (cursorX >= width) {
+                    cursorX = 0
+                    cursorY += lineHeight
+                }
+
+                offset(cursorX, cursorY) {
                     rect(1, lineHeight, cursorColor)
                 }
             }
