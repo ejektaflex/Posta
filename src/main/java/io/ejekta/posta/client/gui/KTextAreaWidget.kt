@@ -5,10 +5,10 @@ import io.ejekta.kambrik.gui.KWidget
 import io.ejekta.kambrik.gui.reactor.KeyReactor
 import io.ejekta.kambrik.gui.reactor.MouseReactor
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.font.TextHandler.LineWrappingConsumer
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.util.InputUtil
 import net.minecraft.text.*
-import kotlin.math.sin
 import kotlin.random.Random
 
 open class KTextAreaWidget(
@@ -42,44 +42,46 @@ open class KTextAreaWidget(
         }
     }
 
-    /*
-
-    abc
-    def
-
-    len: 3,3 = 6
-
-
-
-     */
-
     val mouseReactor = MouseReactor().apply {
         onClickDown = { relX, relY, button ->
-            println("Content: `$content`")
-            println("LH ${relY/lineHeight}")
-            val lines = getTextLines(content)
-            val lineNum = relY / lineHeight
-            if (lineNum < lines.size) {
-                val line = lines[lineNum]
-                val trimmed = renderer.trimToWidth(line, relX)
-                println("$lines - Trimmed: `$trimmed`")
-                val prevLines = lines.subList(0, lineNum)
-                println("Prev: `$prevLines`")
-                cursorPos = prevLines.map { it.length + 1 }.sum() + trimmed.length
-            }
+//            println("Content: `$content`")
+//            println("LH ${relY/lineHeight}")
+//            val lines = getTextLines(content)
+//            val lineNum = relY / lineHeight
+//            if (lineNum < lines.size) {
+//                val line = lines[lineNum]
+//                val trimmed = renderer.trimToWidth(line, relX)
+//                println("$lines - Trimmed: `$trimmed`")
+//                val prevLines = lines.subList(0, lineNum)
+//                println("Prev: `$prevLines`")
+//                cursorPos = prevLines.map { it.length + 1 }.sum() + trimmed.length
+//            }
         }
     }
 
     private fun getTextLines(str: String): List<String> {
-        return str.split("\n").map { splitStr ->
-            if (splitStr.isBlank()) {
-                listOf(splitStr)
-            } else {
-                renderer.textHandler.wrapLines(splitStr, width, Style.EMPTY).map {
-                    it.string
-                }
-            }
-        }.flatten()
+        val list = mutableListOf<String>()
+        renderer.textHandler.wrapLines(
+            str,
+            width,
+            Style.EMPTY,
+            true
+        ) { style: Style?, start: Int, end: Int ->
+            list.add(
+                StringVisitable.styled(str.substring(start, end), style).string
+            )
+        }
+        return list
+//        return str.split("\n").map { splitStr ->
+//
+//        }.flatten()
+    }
+
+    private fun getLine(lines: List<String>): Pair<Int, Int> {
+        var target = cursorPos
+        val mapped = lines.mapIndexed { li, str -> str.mapIndexed { ci, chr -> Triple(li, ci, chr) } }.flatten()
+        val picked = mapped.getOrNull(cursorPos) ?: Triple(lines.size - 1, 0, 'a')
+        return picked.first to picked.second
     }
 
     private fun doot(lines: List<String>): Pair<Int, Int> {
@@ -87,7 +89,7 @@ open class KTextAreaWidget(
         for (i in lines.indices) {
             val line = lines[i]
             if (target > line.length) {
-                target -= line.length + 1
+                target -= line.length
             } else {
                 return i to target
             }
@@ -95,16 +97,15 @@ open class KTextAreaWidget(
         return lines.lastIndex to (lines.lastOrNull()?.length ?: 0)
     }
 
-    private fun getCursorLineAndWidth(str: String): Pair<Int, Int> {
-        val allLines = getTextLines(str)
+    private fun getCursorLineAndWidth(): Pair<Int, Int> {
+        val allLines = getTextLines(content)
 
-        val beforeAmounts = allLines.map { it.length }
+        val beforeAmounts = allLines.sumOf { it.length }
 
         val res = doot(allLines)
 
-
         if (Random.nextDouble() < 0.02) {
-            println("Befor: $allLines, ${beforeAmounts} $cursorPos, T${res.first},${res.second}")
+            println("DOOT: $allLines, $beforeAmounts $cursorPos, T${res.first},${res.second}")
             //println("$lineChs into ${allLines[lineNum]}")
         }
 
@@ -126,34 +127,30 @@ open class KTextAreaWidget(
             return field.coerceIn(0..content.length)
         }
 
-    private val cursorBefore: String
-        get() = if (cursorPos == 0) {
+    fun beforeCursor(str: String): String {
+        return if (cursorPos == 0) {
             ""
         } else {
-            content.substring(0 until cursorPos)
+            str.substring(0 until cursorPos)
         }
+    }
 
-    val isCursorAtEnd: Boolean
-        get() = cursorBefore == content
-
-    private val cursorAfter: String
-        get() = if (cursorPos >= content.length) {
+    fun afterCursor(str: String): String {
+        return if (cursorPos >= str.length) {
             ""
         } else {
-            content.substring(cursorPos until content.length)
+            str.substring(cursorPos until str.length)
         }
-
-    val asText: Text
-        get() = LiteralText(content)
+    }
 
     private fun deleteOnce() {
-        if (cursorBefore.isEmpty()) {
+        if (beforeCursor(content).isEmpty()) {
             return
         }
-        if (cursorAfter.isEmpty()) {
-            content = cursorBefore.dropLast(1)
+        if (afterCursor(content).isEmpty()) {
+            content = beforeCursor(content).dropLast(1)
         } else {
-            content = cursorBefore.dropLast(1) + cursorAfter
+            content = beforeCursor(content).dropLast(1) + afterCursor(content)
             cursorPos--
         }
     }
@@ -174,7 +171,7 @@ open class KTextAreaWidget(
         if (content.isEmpty()) {
             return insertion
         }
-        return "$cursorBefore$insertion$cursorAfter"
+        return "${beforeCursor(content)}$insertion${afterCursor(content)}"
     }
 
     override fun onDraw(area: KGuiDsl.AreaDsl) {
@@ -184,9 +181,9 @@ open class KTextAreaWidget(
             rect(0x0) // black bg
             dsl {
                 getTextLines(content).forEachIndexed { i, cText ->
-                    text(0, i * lineHeight, LiteralText(cText))
+                    text(0, i * lineHeight, LiteralText(cText.trimEnd()))
                 }
-                val location = getCursorLineAndWidth(content)
+                val location = getCursorLineAndWidth()
                 offset(location.second, location.first * lineHeight) {
                     rect(1, lineHeight, cursorColor)
                 }
