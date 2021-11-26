@@ -2,10 +2,10 @@ package io.ejekta.kambrik
 
 import com.mojang.blaze3d.systems.RenderSystem
 import io.ejekta.kambrik.gui.KSpriteGrid
-import io.ejekta.kambrik.gui.KGui
+import io.ejekta.kambrik.gui.KambrikGui
 import io.ejekta.kambrik.gui.KRect
 import io.ejekta.kambrik.gui.reactor.MouseReactor
-import io.ejekta.kambrik.gui.KGuiDsl
+import io.ejekta.kambrik.gui.DrawingScope
 import io.ejekta.kambrik.gui.reactor.EventReactor
 import io.ejekta.kambrik.gui.reactor.KeyReactor
 import net.minecraft.client.gui.screen.ingame.HandledScreen
@@ -23,7 +23,7 @@ abstract class KambrikHandledScreen<SH : ScreenHandler>(
     override val boundsStack = mutableListOf<Pair<MouseReactor, KRect>>()
     override val keyStack = mutableListOf<KeyReactor>()
     override val areaClickStack = mutableListOf<Pair<() -> Unit, KRect>>()
-    override val modalStack = mutableListOf<KGuiDsl.() -> Unit>()
+    override val modalStack = mutableListOf<DrawingScope.() -> Unit>()
 
     override val focused: MutableList<EventReactor> = mutableListOf()
 
@@ -75,7 +75,7 @@ abstract class KambrikHandledScreen<SH : ScreenHandler>(
         return super<HandledScreen>.keyPressed(keyCode, scanCode, modifiers)
     }
 
-    fun kambrikGui(clearOnDraw: Boolean = false, func: KGuiDsl.() -> Unit) = KGui(
+    fun kambrikGui(clearOnDraw: Boolean = false, func: DrawingScope.() -> Unit) = KambrikGui(
         this, { x to y }
     ) {
         if (clearOnDraw) {

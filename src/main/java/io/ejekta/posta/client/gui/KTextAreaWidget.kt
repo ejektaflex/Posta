@@ -1,6 +1,6 @@
 package io.ejekta.posta.client.gui
 
-import io.ejekta.kambrik.gui.KGuiDsl
+import io.ejekta.kambrik.gui.DrawingScope
 import io.ejekta.kambrik.gui.KWidget
 import io.ejekta.kambrik.gui.reactor.KeyReactor
 import io.ejekta.kambrik.gui.reactor.MouseReactor
@@ -172,7 +172,7 @@ open class KTextAreaWidget(
         return "${beforeCursor(content)}$insertion${afterCursor(content)}"
     }
 
-    override fun onDraw(area: KGuiDsl.AreaDsl) {
+    override fun onDraw(area: DrawingScope.AreaScope) {
         area {
             reactWith(keyReactor)
             reactWith(mouseReactor)

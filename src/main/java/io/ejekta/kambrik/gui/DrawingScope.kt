@@ -2,7 +2,6 @@ package io.ejekta.kambrik.gui
 
 import io.ejekta.kambrik.ext.fapi.itemRenderer
 import io.ejekta.kambrik.ext.fapi.textRenderer
-import io.ejekta.kambrik.gui.reactor.EventReactor
 import io.ejekta.kambrik.gui.reactor.KeyReactor
 import io.ejekta.kambrik.gui.reactor.MouseReactor
 import io.ejekta.kambrik.text.KambrikTextBuilder
@@ -22,19 +21,19 @@ import net.minecraft.text.OrderedText
 import net.minecraft.text.Text
 import kotlin.math.max
 
-data class KGuiDsl(val ctx: KGui, val matrices: MatrixStack, val mouseX: Int, val mouseY: Int, val delta: Float?, val drawDebug: Boolean) {
+data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mouseX: Int, val mouseY: Int, val delta: Float?, val drawDebug: Boolean) {
 
-    private val frameDeferredTasks = mutableListOf<KGuiDsl.() -> Unit>()
+    private val frameDeferredTasks = mutableListOf<DrawingScope.() -> Unit>()
 
-    operator fun invoke(func: KGuiDsl.() -> Unit) = apply(func)
+    operator fun invoke(func: DrawingScope.() -> Unit) = apply(func)
 
-    fun draw(func: KGuiDsl.() -> Unit): KGuiDsl {
+    fun draw(func: DrawingScope.() -> Unit): DrawingScope {
         apply(func)
         doLateDeferral()
         return this
     }
 
-    private fun defer(func: KGuiDsl.() -> Unit) {
+    private fun defer(func: DrawingScope.() -> Unit) {
         frameDeferredTasks.add(func)
     }
 
@@ -43,7 +42,7 @@ data class KGuiDsl(val ctx: KGui, val matrices: MatrixStack, val mouseX: Int, va
         frameDeferredTasks.clear()
     }
 
-    fun offset(x: Int, y: Int, func: KGuiDsl.() -> Unit) {
+    fun offset(x: Int, y: Int, func: DrawingScope.() -> Unit) {
         ctx.x += x
         ctx.y += y
         apply(func)
@@ -51,7 +50,7 @@ data class KGuiDsl(val ctx: KGui, val matrices: MatrixStack, val mouseX: Int, va
         ctx.y -= y
     }
 
-    fun rect(x: Int, y: Int, w: Int, h: Int, color: Int, alpha: Int = 0xFF, func: KGuiDsl.() -> Unit = {}) {
+    fun rect(x: Int, y: Int, w: Int, h: Int, color: Int, alpha: Int = 0xFF, func: DrawingScope.() -> Unit = {}) {
         offset(x, y) {
             val sx = ctx.absX()
             val sy = ctx.absY()
@@ -60,7 +59,7 @@ data class KGuiDsl(val ctx: KGui, val matrices: MatrixStack, val mouseX: Int, va
         }
     }
 
-    fun rect(w: Int, h: Int, color: Int, alpha: Int = 0xFF, func: KGuiDsl.() -> Unit = {}) {
+    fun rect(w: Int, h: Int, color: Int, alpha: Int = 0xFF, func: DrawingScope.() -> Unit = {}) {
         rect(0, 0, w, h, color, alpha, func)
     }
 
@@ -84,13 +83,13 @@ data class KGuiDsl(val ctx: KGui, val matrices: MatrixStack, val mouseX: Int, va
         }
     }
 
-    fun onHover(x: Int, y: Int, w: Int, h: Int, func: KGuiDsl.() -> Unit) {
+    fun onHover(x: Int, y: Int, w: Int, h: Int, func: DrawingScope.() -> Unit) {
         if (KRect.isInside(mouseX, mouseY, ctx.absX(x), ctx.absY(y), w, h)) {
             apply(func)
         }
     }
 
-    fun onHover(w: Int, h: Int, func: KGuiDsl.() -> Unit) {
+    fun onHover(w: Int, h: Int, func: DrawingScope.() -> Unit) {
         onHover(0, 0, w, h, func)
     }
 
@@ -166,7 +165,7 @@ data class KGuiDsl(val ctx: KGui, val matrices: MatrixStack, val mouseX: Int, va
         immediate.draw()
     }
 
-    fun sprite(sprite: KSpriteGrid.Sprite, x: Int = 0, y: Int = 0, w: Int = sprite.width, h: Int = sprite.height, func: (AreaDsl.() -> Unit)? = null) {
+    fun sprite(sprite: KSpriteGrid.Sprite, x: Int = 0, y: Int = 0, w: Int = sprite.width, h: Int = sprite.height, func: (AreaScope.() -> Unit)? = null) {
         sprite.draw(
             ctx.screen,
             matrices,
@@ -182,7 +181,7 @@ data class KGuiDsl(val ctx: KGui, val matrices: MatrixStack, val mouseX: Int, va
         }
     }
 
-    fun spriteCenteredInScreen(sprite: KSpriteGrid.Sprite, func: AreaDsl.() -> Unit) {
+    fun spriteCenteredInScreen(sprite: KSpriteGrid.Sprite, func: AreaScope.() -> Unit) {
         offset(ctx.screen.width / 2 - sprite.width / 2, ctx.screen.height / 2 - sprite.height / 2) {
             sprite(sprite)
         }
@@ -223,29 +222,29 @@ data class KGuiDsl(val ctx: KGui, val matrices: MatrixStack, val mouseX: Int, va
                 && mouseY >= ctx.absY(startY) && mouseY <= ctx.absY(startY + h)
     }
 
-    fun area(w: Int, h: Int, func: AreaDsl.() -> Unit) {
+    fun area(w: Int, h: Int, func: AreaScope.() -> Unit) {
         areaDsl.adjusted(w, h, func)
     }
 
-    fun area(relX: Int, relY: Int, w: Int, h: Int, func: AreaDsl.() -> Unit) {
+    fun area(relX: Int, relY: Int, w: Int, h: Int, func: AreaScope.() -> Unit) {
         offset(relX, relY) {
             area(w, h, func)
         }
     }
 
-    private val areaDsl = AreaDsl(0, 0)
+    private val areaDsl = AreaScope(0, 0)
 
-    inner class AreaDsl internal constructor(var w: Int, var h: Int) {
+    inner class AreaScope internal constructor(var w: Int, var h: Int) {
 
-        val dsl: KGuiDsl
-            get() = this@KGuiDsl
+        val dsl: DrawingScope
+            get() = this@DrawingScope
 
-        operator fun invoke(dsl: AreaDsl.() -> Unit) = apply(dsl)
+        operator fun invoke(dsl: AreaScope.() -> Unit) = apply(dsl)
 
         val isHovered: Boolean
             get() = isHovered(w, h)
 
-        internal fun adjusted(newW: Int, newH: Int, func: AreaDsl.() -> Unit) {
+        internal fun adjusted(newW: Int, newH: Int, func: AreaScope.() -> Unit) {
             val oldW = w
             val oldH = h
             w = newW
@@ -269,11 +268,11 @@ data class KGuiDsl(val ctx: KGui, val matrices: MatrixStack, val mouseX: Int, va
             ctx.logic.keyStack.add(0, keyReactor)
         }
 
-        fun rect(color: Int, alpha: Int = 0xFF, func: KGuiDsl.() -> Unit = {}) {
+        fun rect(color: Int, alpha: Int = 0xFF, func: DrawingScope.() -> Unit = {}) {
             rect(w, h, color, alpha, func)
         }
 
-        fun onHover(func: KGuiDsl.() -> Unit) {
+        fun onHover(func: DrawingScope.() -> Unit) {
             onHover(w, h, func)
         }
 
@@ -281,7 +280,7 @@ data class KGuiDsl(val ctx: KGui, val matrices: MatrixStack, val mouseX: Int, va
             textCentered(w / 2, y, text)
         }
 
-        fun widgetCentered(widget: KWidget, func: KGuiDsl.() -> Unit = {}) {
+        fun widgetCentered(widget: KWidget, func: DrawingScope.() -> Unit = {}) {
             offset(w / 2 - widget.width / 2, h / 2 - widget.height / 2) {
                 widget(widget)
                 apply(func)

@@ -1,8 +1,8 @@
 package io.ejekta.kambrik
 
 import com.mojang.blaze3d.systems.RenderSystem
-import io.ejekta.kambrik.gui.KGui
-import io.ejekta.kambrik.gui.KGuiDsl
+import io.ejekta.kambrik.gui.KambrikGui
+import io.ejekta.kambrik.gui.DrawingScope
 import io.ejekta.kambrik.gui.KRect
 import io.ejekta.kambrik.gui.reactor.EventReactor
 import io.ejekta.kambrik.gui.reactor.KeyReactor
@@ -15,7 +15,7 @@ abstract class KambrikScreen(title: Text) : Screen(title), KambrikSurface {
     override val boundsStack = mutableListOf<Pair<MouseReactor, KRect>>()
     override val keyStack = mutableListOf<KeyReactor>()
     override val areaClickStack = mutableListOf<Pair<() -> Unit, KRect>>()
-    override val modalStack = mutableListOf<KGuiDsl.() -> Unit>()
+    override val modalStack = mutableListOf<DrawingScope.() -> Unit>()
 
     override val focused: MutableList<EventReactor> = mutableListOf()
 
@@ -55,7 +55,7 @@ abstract class KambrikScreen(title: Text) : Screen(title), KambrikSurface {
         onDrawForeground(matrices, mouseX, mouseY, delta)
     }
 
-    fun kambrikGui(clearOnDraw: Boolean = false, func: KGuiDsl.() -> Unit) = KGui(
+    fun kambrikGui(clearOnDraw: Boolean = false, func: DrawingScope.() -> Unit) = KambrikGui(
         this, { 0 to 0 }
     ) {
         if (clearOnDraw) {

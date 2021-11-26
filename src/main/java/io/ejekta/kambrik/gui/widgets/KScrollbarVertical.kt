@@ -1,6 +1,6 @@
 package io.ejekta.kambrik.gui.widgets
 
-import io.ejekta.kambrik.gui.KGuiDsl
+import io.ejekta.kambrik.gui.DrawingScope
 import io.ejekta.kambrik.gui.KSpriteGrid
 
 class KScrollbarVertical(
@@ -17,7 +17,7 @@ class KScrollbarVertical(
     override val knobSize: Int
         get() = knobSprite.height
 
-    override fun onDraw(area: KGuiDsl.AreaDsl) {
+    override fun onDraw(area: DrawingScope.AreaScope) {
         super.onDraw(area)
         area.dsl {
             val relY = mouseY - ctx.absY()

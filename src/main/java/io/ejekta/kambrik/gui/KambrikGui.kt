@@ -7,12 +7,12 @@ import net.minecraft.entity.EntityType
 import net.minecraft.entity.LivingEntity
 
 
-class KGui(
+class KambrikGui(
     val screen: Screen,
     private val coordFunc: () -> Pair<Int, Int>,
     var x: Int = 0,
     var y: Int = 0,
-    private val func: KGuiDsl.() -> Unit = {}
+    private val func: DrawingScope.() -> Unit = {}
 ) {
 
     val logic: KambrikSurface
@@ -25,10 +25,10 @@ class KGui(
         logic.areaClickStack.clear()
         logic.keyStack.clear()
         val toDraw = logic.modalStack.lastOrNull() ?: func // Draw top of modal stack, or func if not exists
-        val dsl = KGuiDsl(this, matrices, mouseX, mouseY, delta, true).draw(toDraw)
+        val dsl = DrawingScope(this, matrices, mouseX, mouseY, delta, true).draw(toDraw)
     }
 
-    fun pushModal(dsl: KGuiDsl.() -> Unit) = logic.modalStack.add(dsl)
+    fun pushModal(dsl: DrawingScope.() -> Unit) = logic.modalStack.add(dsl)
 
     fun absX(relX: Int = 0) = x + coordFunc().first + relX
 

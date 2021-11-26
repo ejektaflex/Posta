@@ -1,7 +1,7 @@
 package io.ejekta.kambrik.gui.widgets
 
 import io.ejekta.kambrik.gui.reactor.MouseReactor
-import io.ejekta.kambrik.gui.KGuiDsl
+import io.ejekta.kambrik.gui.DrawingScope
 import io.ejekta.kambrik.gui.KWidget
 import net.minecraft.client.gui.screen.Screen
 import kotlin.math.max
@@ -14,7 +14,7 @@ open class KListWidget<T>(
     private val shown: Int,
     private val orientation: Orientation = Orientation.VERTICAL,
     private val mode: Mode = Mode.MULTI,
-    val onDrawItemFunc: KGuiDsl.(
+    val onDrawItemFunc: DrawingScope.(
         listWidget: KListWidget<T>,
         item: T,
         selected: Boolean
@@ -126,7 +126,7 @@ open class KListWidget<T>(
     val shownRange: IntRange
         get() = (scrollBar?.getIndices(items().size, shown) ?: (0 until shown))
 
-    override fun onDraw(area: KGuiDsl.AreaDsl) {
+    override fun onDraw(area: DrawingScope.AreaScope) {
         area {
             reactWith(reactor)
             dsl {
@@ -148,7 +148,7 @@ open class KListWidget<T>(
         }
     }
 
-    open fun onDrawItem(dsl: KGuiDsl, item: T) {
+    open fun onDrawItem(dsl: DrawingScope, item: T) {
         dsl.onDrawItemFunc(this, item, item in selected)
     }
 }

@@ -1,6 +1,6 @@
 package io.ejekta.kambrik
 
-import io.ejekta.kambrik.gui.KGuiDsl
+import io.ejekta.kambrik.gui.DrawingScope
 import io.ejekta.kambrik.gui.KRect
 import io.ejekta.kambrik.gui.reactor.EventReactor
 import io.ejekta.kambrik.gui.reactor.KeyReactor
@@ -12,7 +12,7 @@ interface KambrikSurface : Element {
     val boundsStack: MutableList<Pair<MouseReactor, KRect>>
     val keyStack: MutableList<KeyReactor>
     val areaClickStack: MutableList<Pair<() -> Unit, KRect>> // Currently unused
-    val modalStack: MutableList<KGuiDsl.() -> Unit>
+    val modalStack: MutableList<DrawingScope.() -> Unit>
     fun onDrawBackground(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float)
     fun onDrawForeground(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float)
 

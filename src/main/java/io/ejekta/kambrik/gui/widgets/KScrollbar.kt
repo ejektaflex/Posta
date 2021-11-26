@@ -1,6 +1,6 @@
 package io.ejekta.kambrik.gui.widgets
 
-import io.ejekta.kambrik.gui.KGuiDsl
+import io.ejekta.kambrik.gui.DrawingScope
 import io.ejekta.kambrik.gui.KSpriteGrid
 import io.ejekta.kambrik.gui.KWidget
 import io.ejekta.kambrik.gui.reactor.MouseReactor
@@ -59,7 +59,7 @@ abstract class KScrollbar(
         return (relPos - (knobSize / 2)).coerceIn(moveRange)
     }
 
-    override fun onDraw(area: KGuiDsl.AreaDsl) {
+    override fun onDraw(area: DrawingScope.AreaScope) {
         area.dsl {
             bgColor?.let {
                 rect(width, height, color = it)
