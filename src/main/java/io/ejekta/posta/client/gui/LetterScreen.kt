@@ -46,7 +46,7 @@ class LetterScreen(
         //TODO("Not yet implemented")
     }
 
-    val textArea = KTextAreaWidget(400, 120)
+    val textArea = KTextAreaWidget(200, 120)
 
     val fgGui = kambrikGui {
         offset(100, 100) {

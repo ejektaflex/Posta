@@ -5,11 +5,10 @@ import io.ejekta.kambrik.gui.KWidget
 import io.ejekta.kambrik.gui.reactor.KeyReactor
 import io.ejekta.kambrik.gui.reactor.MouseReactor
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.font.TextHandler.LineWrappingConsumer
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.util.InputUtil
 import net.minecraft.text.*
-import kotlin.random.Random
+import kotlin.math.abs
 
 open class KTextAreaWidget(
     override val width: Int,
@@ -49,9 +48,21 @@ open class KTextAreaWidget(
             if (lineNum < lines.size) {
                 val line = lines[lineNum]
                 val trimmed = renderer.trimToWidth(line, relX)
-                val newCharIndex = line.length - trimmed.length
+
+                // How much extra to add for current line
+                var trimOffset = trimmed.length
+
+                // If there's another character after it, pick whichever offset is closer to click pos
+                if (line.length > trimmed.length) {
+                    trimOffset = listOf(trimmed.indices, 0..trimmed.length).map {
+                        line.substring(it)
+                    }.minByOrNull {
+                        abs(relX - renderer.getWidth(it) + 1)
+                    }?.length ?: trimOffset
+                }
+
                 val prevLines = lines.subList(0, lineNum)
-                cursorPos = prevLines.sumOf { it.length } + trimmed.length
+                cursorPos = prevLines.sumOf { it.length } + trimOffset
             }
         }
     }
@@ -74,14 +85,7 @@ open class KTextAreaWidget(
         return list
     }
 
-    private fun getLine(lines: List<String>): Pair<Int, Int> {
-        var target = cursorPos
-        val mapped = lines.mapIndexed { li, str -> str.mapIndexed { ci, chr -> Triple(li, ci, chr) } }.flatten()
-        val picked = mapped.getOrNull(cursorPos) ?: Triple(lines.size - 1, 0, 'a')
-        return picked.first to picked.second
-    }
-
-    private fun doot(lines: List<String>): Pair<Int, Int> {
+    private fun getLineAndCharIndex(lines: List<String>): Pair<Int, Int> {
         var target = cursorPos
         for (i in lines.indices) {
             val line = lines[i]
@@ -97,14 +101,7 @@ open class KTextAreaWidget(
     private fun getCursorLineAndWidth(): Pair<Int, Int> {
         val allLines = getTextLines(content)
 
-        val beforeAmounts = allLines.sumOf { it.length }
-
-        val res = doot(allLines)
-
-        if (Random.nextDouble() < 0.02) {
-            //println("DOOT: $allLines, $beforeAmounts $cursorPos, T${res.first},${res.second}")
-            //println("$lineChs into ${allLines[lineNum]}")
-        }
+        val res = getLineAndCharIndex(allLines)
 
         if (res.first in allLines.indices) {
             return if (res.second != 0) {
@@ -181,19 +178,20 @@ open class KTextAreaWidget(
             reactWith(mouseReactor)
             rect(0x0) // black bg
             dsl {
+                // Draw lines
                 getTextLines(content).forEachIndexed { i, cText ->
                     text(0, i * lineHeight, LiteralText(cText.trimEnd()))
                 }
                 val location = getCursorLineAndWidth()
-                // IF cursor would
+
+                // IF cursor would exceed the box width, move to next line
                 var cursorX = location.second
                 var cursorY = location.first * lineHeight
-
                 if (cursorX >= width) {
                     cursorX = 0
                     cursorY += lineHeight
                 }
-
+                // Draw cursor
                 offset(cursorX, cursorY) {
                     rect(1, lineHeight, cursorColor)
                 }
