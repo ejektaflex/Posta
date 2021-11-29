@@ -4,13 +4,14 @@ import io.ejekta.kambrik.gui.DrawingScope
 import io.ejekta.kambrik.gui.KWidget
 import io.ejekta.kambrik.gui.reactor.KeyReactor
 import io.ejekta.kambrik.gui.reactor.MouseReactor
+import io.ejekta.kambrik.text.textLiteral
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.util.InputUtil
 import net.minecraft.text.*
 import kotlin.math.abs
 
-open class KTextAreaWidget(
+open class KTextArea(
     override val width: Int,
     override val height: Int
 ) : KWidget {
@@ -23,6 +24,8 @@ open class KTextAreaWidget(
         get() = MinecraftClient.getInstance().textRenderer
 
     var cursorColor: Int = 0xFFFFFF
+
+    var textColor: Int = 0xFFFFFF
 
     val keyReactor = KeyReactor().apply {
         onPressDown = { keyCode, scanCode, modifiers ->
@@ -121,7 +124,7 @@ open class KTextAreaWidget(
             return field.coerceIn(0..content.length)
         }
 
-    fun beforeCursor(str: String): String {
+    private fun beforeCursor(str: String): String {
         return if (cursorPos == 0) {
             ""
         } else {
@@ -129,7 +132,7 @@ open class KTextAreaWidget(
         }
     }
 
-    fun afterCursor(str: String): String {
+    private fun afterCursor(str: String): String {
         return if (cursorPos >= str.length) {
             ""
         } else {
@@ -174,13 +177,14 @@ open class KTextAreaWidget(
 
     override fun onDraw(area: DrawingScope.AreaScope) {
         area {
-            reactWith(keyReactor)
-            reactWith(mouseReactor)
+            reactWith(keyReactor, mouseReactor)
             rect(0x0) // black bg
             dsl {
                 // Draw lines
                 getTextLines(content).forEachIndexed { i, cText ->
-                    text(0, i * lineHeight, LiteralText(cText.trimEnd()))
+                    text(0, i * lineHeight, textLiteral(cText.trimEnd()) {
+                        color = textColor
+                    })
                 }
                 val location = getCursorLineAndWidth()
 

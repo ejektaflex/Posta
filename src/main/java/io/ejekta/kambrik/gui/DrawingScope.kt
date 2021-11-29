@@ -2,6 +2,7 @@ package io.ejekta.kambrik.gui
 
 import io.ejekta.kambrik.ext.fapi.itemRenderer
 import io.ejekta.kambrik.ext.fapi.textRenderer
+import io.ejekta.kambrik.gui.reactor.EventReactor
 import io.ejekta.kambrik.gui.reactor.KeyReactor
 import io.ejekta.kambrik.gui.reactor.MouseReactor
 import io.ejekta.kambrik.text.KambrikTextBuilder
@@ -266,6 +267,15 @@ data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mous
 
         fun reactWith(keyReactor: KeyReactor) {
             ctx.logic.keyStack.add(0, keyReactor)
+        }
+
+        fun reactWith(vararg reactors: EventReactor) {
+            for (reactor in reactors) {
+                when (reactor) {
+                    is MouseReactor -> reactWith(reactor)
+                    is KeyReactor -> reactWith(reactor)
+                }
+            }
         }
 
         fun rect(color: Int, alpha: Int = 0xFF, func: DrawingScope.() -> Unit = {}) {

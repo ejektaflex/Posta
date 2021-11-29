@@ -2,16 +2,13 @@ package io.ejekta.posta.client.gui
 
 import io.ejekta.kambrik.KambrikHandledScreen
 import io.ejekta.kambrik.ext.client.drawSimpleCenteredImage
-import io.ejekta.kambrik.text.textLiteral
+import io.ejekta.kambrik.gui.reactor.MouseReactor
 import io.ejekta.posta.PostaMod
-import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gui.screen.ingame.HandledScreen
-import net.minecraft.client.gui.widget.TextFieldWidget
-import net.minecraft.client.render.RenderLayer
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.text.Text
+import net.minecraft.util.Formatting
 import net.minecraft.util.Identifier
 
 class LetterScreen(
@@ -27,28 +24,46 @@ class LetterScreen(
         backgroundHeight = 246
     }
 
-    var textField = TextFieldWidget(MinecraftClient.getInstance().textRenderer, 25, 25, 200, 50, textLiteral("Hi!")).apply {
-        setEditable(true)
-        setMaxLength(50)
-    }
-
     override fun init() {
-        addSelectableChild(textField)
-        setInitialFocus(textField)
-        //addSelectableChild(textTwo)
+
     }
 
     override fun handledScreenTick() {
-        textField.tick()
+        //
     }
 
     override fun onDrawBackground(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float) {
         //TODO("Not yet implemented")
     }
 
-    val textArea = KTextAreaWidget(200, 120)
+    val textArea = KTextArea(200, 120)
+
+    val m = MouseReactor().apply {
+        onDragStart = { _, _ ->
+            println("Drag started")
+        }
+        onDragging = { x, y ->
+            println("Drag! $x $y $dragPos")
+        }
+        onDragModify = { x, y ->
+            x to 0
+        }
+        onDragEnd = { _, _ ->
+            println("Drag ended")
+        }
+    }
 
     val fgGui = kambrikGui {
+
+        offset(10, 10) {
+            offset(m.dragPos.first, m.dragPos.second) {
+                area(25, 25) {
+                    rect(Formatting.RED.colorValue!!)
+                    reactWith(m)
+                }
+            }
+        }
+
         offset(100, 100) {
             widget(textArea)
         }
@@ -64,7 +79,6 @@ class LetterScreen(
 
     override fun render(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float) {
         super.render(matrices, mouseX, mouseY, delta)
-        textField.render(matrices, mouseX, mouseY, delta)
         //textTwo.render(matrices, mouseX, mouseY, delta)
     }
 

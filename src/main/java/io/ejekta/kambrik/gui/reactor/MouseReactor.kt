@@ -10,6 +10,7 @@ open class MouseReactor(
     operator fun invoke(func: MouseReactor.() -> Unit) = apply(func)
 
     open var dragPos = 0 to 0
+    open var mouseStartPos: Pair<Int, Int> = 0 to 0
 
     private var lastMouseDraggedPos = 0 to 0
 
@@ -40,6 +41,10 @@ open class MouseReactor(
      */
     var onDragging: (relX: Int, relY: Int) -> Unit = { _, _, ->
         // No-op
+    }
+
+    var onDragModify: (relX: Int, relY: Int) -> Pair<Int, Int> = { relX, relY ->
+        relX to relY
     }
 
     /**
@@ -83,13 +88,26 @@ open class MouseReactor(
         // No-op
     }
 
-    fun doDragStart(relX: Int, relY: Int) {
+    fun doDragStart(relX: Int, relY: Int, absX: Int, absY: Int) {
         isDragging = true
+        mouseStartPos = (absX - dragPos.first) to (absY - dragPos.second)
         onDragStart(relX, relY)
+    }
+
+    fun doDragging(absX: Int, absY: Int) {
+        val modified = onDragModify(
+            dragPos.first - absX + mouseStartPos.first,
+            dragPos.second - absY + mouseStartPos.first
+        )
+        val modX = absX + modified.first
+        val modY = absY + modified.second
+        dragPos = (modX - mouseStartPos.first) to (modY - mouseStartPos.second)
+        onDragging(modified.first, modified.second)
     }
 
     fun doDragStop(relX: Int, relY: Int) {
         isDragging = false
+        mouseStartPos = 0 to 0
         onDragEnd(relX, relY)
     }
 

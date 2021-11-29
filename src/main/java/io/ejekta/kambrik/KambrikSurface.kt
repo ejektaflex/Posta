@@ -62,7 +62,7 @@ interface KambrikSurface : Element {
             if (bounds.second.isInside(mouseX.toInt(), mouseY.toInt())) {
 
                 if (widget.canDragStart() && !widget.isDragging) {
-                    widget.doDragStart(mouseX.toInt() - rect.x, mouseY.toInt() - rect.y)
+                    widget.doDragStart(mouseX.toInt() - rect.x, mouseY.toInt() - rect.y, mouseX.toInt(), mouseY.toInt())
                 }
 
                 widget.doClickDown(mouseX.toInt() - rect.x, mouseY.toInt() - rect.y, button)
@@ -98,7 +98,10 @@ interface KambrikSurface : Element {
         }
         cycleMouseReactors { mouseReact, rect ->
             if (mouseReact.isDragging) {
-                mouseReact.onDragging(mouseX.toInt() - rect.x, mouseY.toInt() - rect.y)
+                mouseReact.doDragging(
+                    mouseX.toInt(),
+                    mouseY.toInt()
+                )
             }
         }
     }
