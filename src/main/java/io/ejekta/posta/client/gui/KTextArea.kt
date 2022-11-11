@@ -127,42 +127,24 @@ open class KTextArea(
             if (lineNum < lines.size) {
                 val line = lines[lineNum]
                 val nextLine = lines.getOrNull(lineNum + 1)
-                val isOverflowOrEnd = !line.endsWith('\n')
+                val isSoftwrappedOrEnd = !line.endsWith('\n')
                 val isEnd = nextLine == null
+                val isSoftwrapped = isSoftwrappedOrEnd && !isEnd
                 val trimmed = renderer.trimToWidth(line, relX)
 
                 println("Line: $line, Trimmed: $trimmed")
 
                 val prevLinesAmount = lines.subList(0, lineNum).sumOf { it.length }
-                var currLineAmount = trimmed.length
+                
+                cursorPos = prevLinesAmount
 
-
+                // if past the end of the visual line
                 if (renderer.getWidth(line.trimEnd('\n')) <= relX) {
                     println("We're past the end of the line bro")
-                    currLineAmount = line.trimEnd('\n').length
-                }
-
-                println("ISOVERFLOW: $isOverflowOrEnd")
-
-                if (isOverflowOrEnd && !isEnd) {
-                    cursorPos = prevLinesAmount + currLineAmount - 1
+                    cursorPos += line.trimEnd('\n').length + (if (isSoftwrapped) -1 else 0)
                 } else {
-                    cursorPos = prevLinesAmount + currLineAmount
+                    cursorPos += trimmed.length // otherwise just move to the end of string where cursor was
                 }
-
-
-                // How much extra to add for current line
-//                val trimOffset = trimmed.length
-//
-//                val isUntrim = line.length == trimmed.length && lineNum != lines.size - 1
-//
-//                val prevLines = lines.subList(0, lineNum)
-//
-//                val thisLineLength = trimOffset - (if (isUntrim) 1 else 0)
-//
-//                cursorPos = prevLines.sumOf { it.length } + thisLineLength
-//
-//                val lci = getLineAndCharIndex(lines).second
 
                 // Char nudging - clicking 2/3 of the way on the next char moves the cursor an additional spot
 
