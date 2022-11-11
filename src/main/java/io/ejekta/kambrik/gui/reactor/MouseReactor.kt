@@ -14,7 +14,7 @@ open class MouseReactor(
     open var dragPos = Vec2i.ZERO
     open var mouseStartPos = Vec2i.ZERO
 
-    private var lastMouseDraggedPos = 0 to 0
+    private var lastMouseDraggedPos = Vec2i.ZERO
 
     var isHeld = false
         private set
@@ -93,18 +93,14 @@ open class MouseReactor(
     fun doDragStart(relVec: Vec2i, absVec: Vec2i) {
         isDragging = true
         mouseStartPos = absVec
+        lastMouseDraggedPos = Vec2i.ZERO
         onDragStart(relVec)
     }
 
     fun doDragging(absVec: Vec2i) {
-        val modified = onDragModify(dragPos - absVec + mouseStartPos)
-
-        //onDragging(absX, absY)
-
-        // amount to move (drag delta) =
-
-        //dragPos = (-mouseStartPos.first + absX to -mouseStartPos.second + absY)
-
+        val dragDelta = onDragModify(absVec - mouseStartPos + lastMouseDraggedPos)
+        dragPos += dragDelta
+        lastMouseDraggedPos -= dragDelta
     }
 
     fun doDragStop(relVec: Vec2i) {
