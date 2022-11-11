@@ -42,9 +42,9 @@ class LetterScreen(
         onDragStart = { _ ->
             println("Drag started")
         }
-        onDragging = { _ ->
-            println("Drag! $x $y $dragPos")
-        }
+//        onDragging = { _ ->
+//            println("Drag! $x $y $dragPos")
+//        }
         onDragEnd = { _ ->
             println("Drag ended")
         }

@@ -4,6 +4,7 @@ import io.ejekta.kambrik.gui.DrawingScope
 import io.ejekta.kambrik.gui.KWidget
 import io.ejekta.kambrik.gui.reactor.KeyReactor
 import io.ejekta.kambrik.gui.reactor.MouseReactor
+import io.ejekta.kambrik.math.Vec2i
 import io.ejekta.kambrik.text.textLiteral
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
@@ -27,38 +28,6 @@ open class KTextArea(
     var cursorColor: Int = 0xFFFFFF
 
     var textColor: Int = 0xFFFFFF
-
-    val keyReactor = KeyReactor().apply {
-        onPressDown = { keyCode, scanCode, modifiers ->
-            when (keyCode) {
-                InputUtil.GLFW_KEY_LEFT -> {
-                    if (Screen.hasControlDown()) {
-                        moveTo(wordLeft())
-                    } else {
-                        moveTo(left())
-                    }
-                }
-                InputUtil.GLFW_KEY_RIGHT -> {
-                    if (Screen.hasControlDown()) {
-                        moveTo(wordRight())
-                    } else {
-                        moveTo(right())
-                    }
-                }
-                InputUtil.GLFW_KEY_ENTER -> {
-                    insert("\n")
-                    //cursorPos++
-                }
-                InputUtil.GLFW_KEY_BACKSPACE -> deleteTo(left())
-                InputUtil.GLFW_KEY_DELETE -> deleteTo(right())
-            }
-        }
-        onType = { char, modifiers ->
-            println("")
-
-            insert(char.toString())
-        }
-    }
 
     val virtualString: String
         get() = virtualContent.joinToString("\n")
@@ -110,49 +79,6 @@ open class KTextArea(
         val indexes = listOf(toIndex, cursorPos).sorted()
         content = content.replaceRange(indexes.first(), indexes.last(), "")
         cursorPos = indexes.first()
-    }
-
-    // Gets a cursor position from a line number and
-//    fun cursorPosFrom(pair: Pair<Int, Int>): Int {
-//
-//    }
-
-    val mouseReactor = MouseReactor().apply {
-        onClickDown = { relVec, button ->
-            val lines = getTextLines(content)
-            val lineNum = relVec.y / lineHeight
-
-            // If it's a valid lineNum in our system
-            if (lineNum < lines.size) {
-                val line = lines[lineNum]
-                val nextLine = lines.getOrNull(lineNum + 1)
-                val isSoftwrapped = !line.endsWith('\n') && nextLine != null
-                val trimmed = renderer.trimToWidth(line, relVec.x)
-
-                cursorPos = lines.subList(0, lineNum).sumOf { it.length } // move to start of clicked line
-
-                // if past the end of the visual line
-                if (renderer.getWidth(line.trimEnd('\n')) <= relVec.x) {
-                    cursorPos += line.trimEnd('\n').length + (if (isSoftwrapped) -1 else 0)
-                } else {
-                    cursorPos += trimmed.length // otherwise just move to the end of string where cursor was
-                    // Implement "nudging" - if clicked on a character, nudge right if on the right side
-                    val doot = getLineAndCharIndex(lines)
-                    val nextChar = line.getOrNull(doot.second)
-                    val charSize = nextChar?.let { renderer.getWidth(it.toString()) }
-                    charSize?.let {
-                        val currentCaretWidth = renderer.getWidth(line.substring(0 until doot.second))
-                        // If over halfway clicked through the char, go forward one char
-                        if (relVec.x - currentCaretWidth >= it / 2) {
-                            cursorPos++
-                        }
-                        println("Char: $nextChar, Size: $it, Clicked At: ${relVec.x}, Trimmed to: ${renderer.getWidth(line.substring(0 until doot.second))}")
-                    }
-                }
-            } else {
-                moveTo(virtualString.length)
-            }
-        }
     }
 
     private fun getTextLines(str: String): List<String> {
@@ -259,6 +185,102 @@ open class KTextArea(
         return "${beforeCursor(content)}$insertion${afterCursor(content)}"
     }
 
+    val keyReactor = KeyReactor().apply {
+        onPressDown = { keyCode, scanCode, modifiers ->
+            when (keyCode) {
+                InputUtil.GLFW_KEY_LEFT -> {
+                    if (Screen.hasControlDown()) {
+                        moveTo(wordLeft())
+                    } else {
+                        moveTo(left())
+                    }
+                }
+                InputUtil.GLFW_KEY_RIGHT -> {
+                    if (Screen.hasControlDown()) {
+                        moveTo(wordRight())
+                    } else {
+                        moveTo(right())
+                    }
+                }
+                InputUtil.GLFW_KEY_ENTER -> {
+                    insert("\n")
+                    //cursorPos++
+                }
+                InputUtil.GLFW_KEY_BACKSPACE -> deleteTo(left())
+                InputUtil.GLFW_KEY_DELETE -> deleteTo(right())
+            }
+        }
+        onType = { char, modifiers ->
+            println("")
+
+            insert(char.toString())
+        }
+    }
+
+    private var dragStartRel = Vec2i.ZERO
+    private var dragEndRel = Vec2i.ZERO
+
+    // Gets the position of the caret from a local vector
+    fun getCaretPosition(relVec: Vec2i): Int {
+        var returnCaret = 0
+        val lines = getTextLines(content)
+        val lineNum = relVec.y / lineHeight
+
+        // If it's a valid lineNum in our system
+        if (lineNum < lines.size) {
+            val line = lines[lineNum]
+            val nextLine = lines.getOrNull(lineNum + 1)
+            val isSoftwrapped = !line.endsWith('\n') && nextLine != null
+            val trimmed = renderer.trimToWidth(line, relVec.x)
+
+            returnCaret = lines.subList(0, lineNum).sumOf { it.length } // move to start of clicked line
+
+            // if past the end of the visual line
+            if (renderer.getWidth(line.trimEnd('\n')) <= relVec.x) {
+                returnCaret += line.trimEnd('\n').length + (if (isSoftwrapped) -1 else 0)
+            } else {
+                returnCaret += trimmed.length // otherwise just move to the end of string where cursor was
+                // Implement "nudging" - if clicked on the right side of a character, nudge the cursor right
+                val doot = getLineAndCharIndex(lines)
+                val nextChar = line.getOrNull(doot.second)
+                val charSize = nextChar?.let { renderer.getWidth(it.toString()) }
+                charSize?.let {
+                    val currentCaretWidth = renderer.getWidth(line.substring(0 until doot.second))
+                    // If over halfway clicked through the char, go forward one char
+                    if (relVec.x - currentCaretWidth >= it / 2) {
+                        returnCaret++
+                    }
+                    //println("Char: $nextChar, Size: $it, Clicked At: ${relVec.x}, Trimmed to: ${renderer.getWidth(line.substring(0 until doot.second))}")
+                }
+            }
+        } else {
+            returnCaret = virtualString.length
+        }
+
+        return returnCaret
+    }
+
+    val mouseReactor = MouseReactor().apply {
+
+        // Placing caret
+        onClickDown = { relVec, button ->
+            moveTo(getCaretPosition(relVec))
+            dragStartRel = relVec
+        }
+
+        // Dragging
+        onDragging = { lastDragDelta, totalDragDelta ->
+            dragEndRel = totalDragDelta
+        }
+
+        onDragEnd = { relVec ->
+            println("We ended the drag here: $relVec")
+            dragStartRel = Vec2i.ZERO
+            dragEndRel = Vec2i.ZERO
+        }
+
+    }
+
     override fun onDraw(area: DrawingScope.AreaScope) {
         area {
             reactWith(keyReactor, mouseReactor)
@@ -283,6 +305,11 @@ open class KTextArea(
                 offset(cursorX, cursorY) {
                     rect(1, lineHeight, cursorColor)
                 }
+
+                offset(dragStartRel) {
+                    rect(dragEndRel.x, dragEndRel.y, color = 0x88FFFF)
+                }
+
             }
         }
     }

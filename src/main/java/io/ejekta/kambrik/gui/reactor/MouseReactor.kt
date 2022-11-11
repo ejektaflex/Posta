@@ -33,7 +33,7 @@ open class MouseReactor(
     /**
      * A callback that fires when we start dragging this widget.
      */
-    var onDragStart: (relVec: Vec2i) -> Unit = { _ ->
+    var onDragStart: (relStartVec: Vec2i) -> Unit = { _ ->
         // No-op
     }
 
@@ -41,7 +41,7 @@ open class MouseReactor(
      * A callback that fires while the widget is being dragged.
      * Unlike onMouseMoved, this fires even when not hovering the widget.
      */
-    var onDragging: (relVec: Vec2i) -> Unit = { _ ->
+    var onDragging: (lastDragDelta: Vec2i, totalDragDelta: Vec2i) -> Unit = { _, _ ->
         // No-op
     }
 
@@ -53,7 +53,7 @@ open class MouseReactor(
      * A callback that fires when we stop dragging this widget.
      * Note: Drag end does not always occur inside the widget bounds!
      */
-    var onDragEnd: (relVec: Vec2i) -> Unit = { _ ->
+    var onDragEnd: (relEndVec: Vec2i) -> Unit = { _ ->
         // No-op
     }
 
@@ -99,6 +99,7 @@ open class MouseReactor(
 
     fun doDragging(absVec: Vec2i) {
         val dragDelta = onDragModify(absVec - mouseStartPos + lastMouseDraggedPos)
+        onDragging(dragDelta, lastMouseDraggedPos * -1)
         dragPos += dragDelta
         lastMouseDraggedPos -= dragDelta
     }
