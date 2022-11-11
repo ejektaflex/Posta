@@ -36,7 +36,7 @@ class LetterScreen(
         //TODO("Not yet implemented")
     }
 
-    val textArea = KTextArea(160, 120)
+    val textArea = KTextArea(160, 110)
 
     val m = MouseReactor().apply {
         onDragStart = { _, _ ->
@@ -67,8 +67,12 @@ class LetterScreen(
             offset(0, -backgroundHeight/2 + 5) {
                 widget(textArea)
             }
-            textNoShadow(0, 5) {
+            textNoShadow(0, -5) {
                 addLiteral("POS: ${textArea.virtualLineChar} C: ${textArea.cursorPos}, VSL: ${textArea.virtualString.length}, SL: ${textArea.content.length}")
+                format(Formatting.BLACK)
+            }
+            textNoShadow(0, 5) {
+                addLiteral("CL&W: ${textArea.getCursorLineAndWidth()}")
                 format(Formatting.BLACK)
             }
         }

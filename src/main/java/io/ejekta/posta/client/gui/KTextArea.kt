@@ -10,7 +10,6 @@ import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.util.InputUtil
 import net.minecraft.text.*
-import kotlin.math.abs
 import kotlin.math.min
 
 open class KTextArea(
@@ -51,10 +50,12 @@ open class KTextArea(
                     //cursorPos++
                 }
                 InputUtil.GLFW_KEY_BACKSPACE -> deleteTo(left())
+                InputUtil.GLFW_KEY_DELETE -> deleteTo(right())
             }
         }
         onType = { char, modifiers ->
             println("")
+
             insert(char.toString())
         }
     }
@@ -78,6 +79,10 @@ open class KTextArea(
 
     override fun right(): Int {
         return (cursorPos + 1).coerceAtMost(virtualString.length)
+    }
+
+    fun charAt(index: Int): Char {
+        return content[index]
     }
 
     override fun wordRight(): Int {
@@ -107,7 +112,10 @@ open class KTextArea(
         cursorPos = indexes.first()
     }
 
-
+    // Gets a cursor position from a line number and
+//    fun cursorPosFrom(pair: Pair<Int, Int>): Int {
+//
+//    }
 
     val mouseReactor = MouseReactor().apply {
         onClickDown = { relX, relY, button ->
@@ -117,41 +125,61 @@ open class KTextArea(
 
             // If it's a valid lineNum in our system
             if (lineNum < lines.size) {
-                var line = lines[lineNum]
+                val line = lines[lineNum]
+                val nextLine = lines.getOrNull(lineNum + 1)
+                val isOverflowOrEnd = !line.endsWith('\n')
+                val isEnd = nextLine == null
                 val trimmed = renderer.trimToWidth(line, relX)
 
+                println("Line: $line, Trimmed: $trimmed")
 
-                println("Line: $line (${line.length}) | (${line.trimEnd('\n').length}) | (${trimmed.length})")
+                val prevLinesAmount = lines.subList(0, lineNum).sumOf { it.length }
+                var currLineAmount = trimmed.length
 
-                // How much extra to add for current line
-                var trimOffset = trimmed.length
 
-                val isUntrim = line.length == trimmed.length && lineNum != lines.size - 1
-
-                val prevLines = lines.subList(0, lineNum)
-
-                val thisLineLength = trimOffset - (if (isUntrim) 1 else 0)
-
-                cursorPos = prevLines.sumOf { it.length } + thisLineLength
-
-                val lci = getLineAndCharIndex(lines).second
-
-                // Somehow this works for all but the very last character
-                val nextChar = line.getOrNull(lci)?.takeIf { lci < line.length - 1 }
-
-                nextChar?.let {
-                    val nextCharSize = renderer.getWidth(it.toString())
-                    println("Next char ($it) size: $nextCharSize")
-                    println("My rel: $relX")
-                    val thisLineText = renderer.getWidth(line.substring(0 until thisLineLength))
-                    println("My line: $thisLineText")
-                    val wDiff = relX - thisLineText
-                    if (wDiff >= nextCharSize / 2) {
-                        cursorPos++
-                    }
+                if (renderer.getWidth(line.trimEnd('\n')) <= relX) {
+                    println("We're past the end of the line bro")
+                    currLineAmount = line.trimEnd('\n').length
                 }
 
-                println("Went to $cursorPos.")
+                println("ISOVERFLOW: $isOverflowOrEnd")
+
+                if (isOverflowOrEnd && !isEnd) {
+                    cursorPos = prevLinesAmount + currLineAmount - 1
+                } else {
+                    cursorPos = prevLinesAmount + currLineAmount
+                }
+
+
+                // How much extra to add for current line
+//                val trimOffset = trimmed.length
+//
+//                val isUntrim = line.length == trimmed.length && lineNum != lines.size - 1
+//
+//                val prevLines = lines.subList(0, lineNum)
+//
+//                val thisLineLength = trimOffset - (if (isUntrim) 1 else 0)
+//
+//                cursorPos = prevLines.sumOf { it.length } + thisLineLength
+//
+//                val lci = getLineAndCharIndex(lines).second
+
+                // Char nudging - clicking 2/3 of the way on the next char moves the cursor an additional spot
+
+                // Somehow this works for all but the very last character
+//                val nextChar = line.getOrNull(lci)?.takeIf { lci < line.length - 1 }
+//
+//                nextChar?.let {
+//                    val nextCharSize = renderer.getWidth(it.toString())
+//                    println("Next char ($it) size: $nextCharSize")
+//                    println("My rel: $relX")
+//                    val thisLineText = renderer.getWidth(line.substring(0 until thisLineLength))
+//                    println("My line: $thisLineText")
+//                    val wDiff = relX - thisLineText
+//                    if (wDiff >= nextCharSize / 2) {
+//                        cursorPos++
+//                    }
+//                }
             } else {
                 moveTo(virtualString.length)
             }
@@ -170,6 +198,7 @@ open class KTextArea(
                 StringVisitable.styled(str.substring(start, end), style).string
             )
         }
+        // Newline is by default clipped? This reinserts a new blank like for it
         if (str.lastOrNull() == '\n') {
             list.add("")
         }
@@ -189,7 +218,7 @@ open class KTextArea(
         return lines.lastIndex to (lines.lastOrNull()?.length ?: 0)
     }
 
-    private fun getCursorLineAndWidth(): Pair<Int, Int> {
+    fun getCursorLineAndWidth(): Pair<Int, Int> {
         val allLines = getTextLines(content)
 
         val res = getLineAndCharIndex(allLines)
