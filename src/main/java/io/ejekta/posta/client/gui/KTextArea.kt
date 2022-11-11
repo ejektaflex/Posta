@@ -121,47 +121,34 @@ open class KTextArea(
         onClickDown = { relX, relY, button ->
             val lines = getTextLines(content)
             val lineNum = relY / lineHeight
-            println("Clicked on TE LineNum: $lineNum")
 
             // If it's a valid lineNum in our system
             if (lineNum < lines.size) {
                 val line = lines[lineNum]
                 val nextLine = lines.getOrNull(lineNum + 1)
-                val isSoftwrappedOrEnd = !line.endsWith('\n')
-                val isEnd = nextLine == null
-                val isSoftwrapped = isSoftwrappedOrEnd && !isEnd
+                val isSoftwrapped = !line.endsWith('\n') && nextLine != null
                 val trimmed = renderer.trimToWidth(line, relX)
 
-                println("Line: $line, Trimmed: $trimmed")
-
-                val prevLinesAmount = lines.subList(0, lineNum).sumOf { it.length }
-                
-                cursorPos = prevLinesAmount
+                cursorPos = lines.subList(0, lineNum).sumOf { it.length } // move to start of clicked line
 
                 // if past the end of the visual line
                 if (renderer.getWidth(line.trimEnd('\n')) <= relX) {
-                    println("We're past the end of the line bro")
                     cursorPos += line.trimEnd('\n').length + (if (isSoftwrapped) -1 else 0)
                 } else {
                     cursorPos += trimmed.length // otherwise just move to the end of string where cursor was
+                    // Implement "nudging" - if clicked on a character, nudge right if on the right side
+                    val doot = getLineAndCharIndex(lines)
+                    val nextChar = line.getOrNull(doot.second)
+                    val charSize = nextChar?.let { renderer.getWidth(it.toString()) }
+                    charSize?.let {
+                        val currentCaretWidth = renderer.getWidth(line.substring(0 until doot.second))
+                        // If over halfway clicked through the char, go forward one char
+                        if (relX - currentCaretWidth >= it / 2) {
+                            cursorPos++
+                        }
+                        println("Char: $nextChar, Size: $it, Clicked At: $relX, Trimmed to: ${renderer.getWidth(line.substring(0 until doot.second))}")
+                    }
                 }
-
-                // Char nudging - clicking 2/3 of the way on the next char moves the cursor an additional spot
-
-                // Somehow this works for all but the very last character
-//                val nextChar = line.getOrNull(lci)?.takeIf { lci < line.length - 1 }
-//
-//                nextChar?.let {
-//                    val nextCharSize = renderer.getWidth(it.toString())
-//                    println("Next char ($it) size: $nextCharSize")
-//                    println("My rel: $relX")
-//                    val thisLineText = renderer.getWidth(line.substring(0 until thisLineLength))
-//                    println("My line: $thisLineText")
-//                    val wDiff = relX - thisLineText
-//                    if (wDiff >= nextCharSize / 2) {
-//                        cursorPos++
-//                    }
-//                }
             } else {
                 moveTo(virtualString.length)
             }
