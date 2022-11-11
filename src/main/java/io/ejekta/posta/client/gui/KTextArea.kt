@@ -124,25 +124,32 @@ open class KTextArea(
                 println("Line: $line (${line.length}) | (${line.trimEnd('\n').length}) | (${trimmed.length})")
 
                 // How much extra to add for current line
-                val trimOffset = trimmed.length
+                var trimOffset = trimmed.length
 
-                val untrim = if (line.length == trimmed.length) 1 else 0
-
-                // If there's another character after it, pick whichever offset is closer to click pos
-//                if (line.length > trimmed.length && !isAtEnd) {
-//                    println("BUMPING TRIM OFFSET: ${line.length}")
-//                    trimOffset = listOf(trimmed.indices, 0..trimmed.length).map {
-//                        line.substring(it)
-//                    }.minByOrNull {
-//                        abs(relX - renderer.getWidth(it) + 1)
-//                    }?.length ?: trimOffset
-//                }
+                val isUntrim = line.length == trimmed.length && lineNum != lines.size - 1
 
                 val prevLines = lines.subList(0, lineNum)
 
-                println("Should be going to.. ${prevLines.sumOf { it.length }} w/o offset (off $trimOffset)")
+                val thisLineLength = trimOffset - (if (isUntrim) 1 else 0)
 
-                cursorPos = prevLines.sumOf { it.length } + trimOffset - untrim
+                cursorPos = prevLines.sumOf { it.length } + thisLineLength
+
+                val lci = getLineAndCharIndex(lines).second
+
+                // Somehow this works for all but the very last character
+                val nextChar = line.getOrNull(lci)?.takeIf { lci < line.length - 1 }
+
+                nextChar?.let {
+                    val nextCharSize = renderer.getWidth(it.toString())
+                    println("Next char ($it) size: $nextCharSize")
+                    println("My rel: $relX")
+                    val thisLineText = renderer.getWidth(line.substring(0 until thisLineLength))
+                    println("My line: $thisLineText")
+                    val wDiff = relX - thisLineText
+                    if (wDiff >= nextCharSize / 2) {
+                        cursorPos++
+                    }
+                }
 
                 println("Went to $cursorPos.")
             } else {
