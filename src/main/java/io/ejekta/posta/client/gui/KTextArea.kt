@@ -117,35 +117,32 @@ open class KTextArea(
 
             // If it's a valid lineNum in our system
             if (lineNum < lines.size) {
-                var line = lines[lineNum].trimEnd()
+                var line = lines[lineNum]
                 val trimmed = renderer.trimToWidth(line, relX)
 
 
-
-
-                println("LINE: $line (${line.length}) || TR: $trimmed (${trimmed.length})")
-                println("Line ends at: ${line.trimEnd().length}")
-
+                println("Line: $line (${line.length}) | (${line.trimEnd('\n').length}) | (${trimmed.length})")
 
                 // How much extra to add for current line
-                var trimOffset = trimmed.length
+                val trimOffset = trimmed.length
 
+                val untrim = if (line.length == trimmed.length) 1 else 0
 
                 // If there's another character after it, pick whichever offset is closer to click pos
-                if (line.length > trimmed.length) {
-                    println("BUMPING TRIM OFFSET: ${line.length}")
-                    trimOffset = listOf(trimmed.indices, 0..trimmed.length).map {
-                        line.substring(it)
-                    }.minByOrNull {
-                        abs(relX - renderer.getWidth(it) + 1)
-                    }?.length ?: trimOffset
-                }
+//                if (line.length > trimmed.length && !isAtEnd) {
+//                    println("BUMPING TRIM OFFSET: ${line.length}")
+//                    trimOffset = listOf(trimmed.indices, 0..trimmed.length).map {
+//                        line.substring(it)
+//                    }.minByOrNull {
+//                        abs(relX - renderer.getWidth(it) + 1)
+//                    }?.length ?: trimOffset
+//                }
 
                 val prevLines = lines.subList(0, lineNum)
 
                 println("Should be going to.. ${prevLines.sumOf { it.length }} w/o offset (off $trimOffset)")
 
-                cursorPos = prevLines.sumOf { it.length } + trimOffset
+                cursorPos = prevLines.sumOf { it.length } + trimOffset - untrim
 
                 println("Went to $cursorPos.")
             } else {
