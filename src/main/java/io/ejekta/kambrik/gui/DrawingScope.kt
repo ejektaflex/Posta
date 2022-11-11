@@ -17,7 +17,7 @@ import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.EntityType
 import net.minecraft.entity.LivingEntity
 import net.minecraft.item.ItemStack
-import net.minecraft.text.LiteralText
+import net.minecraft.text.MutableText
 import net.minecraft.text.OrderedText
 import net.minecraft.text.Text
 import kotlin.math.max
@@ -105,7 +105,7 @@ data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mous
         }
     }
 
-    fun tooltip(func: KambrikTextBuilder<LiteralText>.() -> Unit) {
+    fun tooltip(func: KambrikTextBuilder<MutableText>.() -> Unit) {
         tooltip(listOf(textLiteral("", func)))
     }
 
@@ -117,9 +117,9 @@ data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mous
         ctx.screen.textRenderer.drawWithShadow(matrices, orderedText, ctx.absX(x).toFloat(), ctx.absY(y).toFloat(), 0xFFFFFF)
     }
 
-    fun text(x: Int, y: Int, string: String) = text(x, y, LiteralText(string))
+    fun text(x: Int, y: Int, string: String) = text(x, y, Text.literal(string))
 
-    fun text(x: Int = 0, y: Int = 0, textDsl: KambrikTextBuilder<LiteralText>.() -> Unit) {
+    fun text(x: Int = 0, y: Int = 0, textDsl: KambrikTextBuilder<MutableText>.() -> Unit) {
         text(x, y, textLiteral("", textDsl))
     }
 
@@ -127,7 +127,7 @@ data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mous
         ctx.screen.textRenderer.draw(matrices, text, ctx.absX(x).toFloat(), ctx.absY(y).toFloat(), 0xFFFFFF)
     }
 
-    fun textNoShadow(x: Int = 0, y: Int = 0, textDsl: KambrikTextBuilder<LiteralText>.() -> Unit) {
+    fun textNoShadow(x: Int = 0, y: Int = 0, textDsl: KambrikTextBuilder<MutableText>.() -> Unit) {
         textNoShadow(x, y, textLiteral("", textDsl))
     }
 
@@ -142,7 +142,7 @@ data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mous
         )
     }
 
-    fun textCentered(x: Int = 0, y: Int = 0, textDsl: KambrikTextBuilder<LiteralText>.() -> Unit) {
+    fun textCentered(x: Int = 0, y: Int = 0, textDsl: KambrikTextBuilder<MutableText>.() -> Unit) {
         textCentered(x, y, textLiteral("", textDsl))
     }
 
@@ -186,6 +186,16 @@ data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mous
         offset(ctx.screen.width / 2 - sprite.width / 2, ctx.screen.height / 2 - sprite.height / 2) {
             sprite(sprite)
         }
+    }
+
+    fun areaCenteredInScreen(w: Int, h: Int, func: AreaScope.() -> Unit) {
+        offset(ctx.screen.width / 2 - w / 2, ctx.screen.height / 2 - h / 2) {
+            area(w, h, func)
+        }
+    }
+
+    fun widgetCenteredInScreen(widget: KWidget, func: AreaScope.() -> Unit = { } ) {
+        areaCenteredInScreen(widget.width, widget.height, func)
     }
 
     fun livingEntity(entity: LivingEntity, x: Int = 0, y: Int = 0, size: Double = 20.0) {

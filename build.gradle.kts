@@ -1,9 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-	kotlin("jvm") version "1.6.0"
+	kotlin("jvm") version "1.7.20"
 	kotlin("plugin.serialization") version "1.6.0"
-	id("fabric-loom") version "0.10-SNAPSHOT"
+	id("fabric-loom") version "0.12-SNAPSHOT"
 }
 
 // https://modmuss50.me/fabric.html
@@ -14,16 +14,16 @@ object Versions {
 		const val Group = "com.example"
 	}
 	object Fabric {
-		const val API = "0.42.9+1.18"
-		const val Loader = "0.12.5"
-		const val Yarn = "1.18-pre5+build.11"
-		const val KotlinAdapter = "1.6.5+kotlin.1.5.31"
+		const val API = "0.66.0+1.19.2"
+		const val Loader = "0.14.10"
+		const val Yarn = "1.19.2+build.28"
+		const val KotlinAdapter = "1.8.5+kotlin.1.7.20"
 	}
 	object Dependencies {
-		const val Minecraft = "1.18-pre5"
-		const val Kotlin = "1.6.0"
+		const val Minecraft = "1.19.2"
+		const val Kotlin = "1.7.20"
 		const val KotlinxXSerialization = "1.3.1"
-		const val Kambrik = "3.+"
+		const val Kambrik = "5.+"
 	}
 }
 
@@ -58,6 +58,7 @@ dependencies {
 
 	// Fabric API
 	modImplementation("net.fabricmc.fabric-api:fabric-api:${Versions.Fabric.API}")
+    implementation(kotlin("script-runtime"))
 }
 
 

@@ -7,14 +7,16 @@ import io.ejekta.kambrik.gui.reactor.MouseReactor
 import io.ejekta.kambrik.text.textLiteral
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
+import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.util.InputUtil
 import net.minecraft.text.*
 import kotlin.math.abs
+import kotlin.math.min
 
 open class KTextArea(
     override val width: Int,
     override val height: Int
-) : KWidget {
+) : KWidget, ITextBox {
 
     var content = "hi"
 
@@ -30,19 +32,81 @@ open class KTextArea(
     val keyReactor = KeyReactor().apply {
         onPressDown = { keyCode, scanCode, modifiers ->
             when (keyCode) {
-                InputUtil.GLFW_KEY_LEFT -> cursorPos--
-                InputUtil.GLFW_KEY_RIGHT -> cursorPos++
+                InputUtil.GLFW_KEY_LEFT -> {
+                    if (Screen.hasControlDown()) {
+                        moveTo(wordLeft())
+                    } else {
+                        moveTo(left())
+                    }
+                }
+                InputUtil.GLFW_KEY_RIGHT -> {
+                    if (Screen.hasControlDown()) {
+                        moveTo(wordRight())
+                    } else {
+                        moveTo(right())
+                    }
+                }
                 InputUtil.GLFW_KEY_ENTER -> {
                     insert("\n")
                     cursorPos++
                 }
-                InputUtil.GLFW_KEY_BACKSPACE -> deleteOnce()
+                InputUtil.GLFW_KEY_BACKSPACE -> deleteTo(left())
             }
         }
         onType = { char, modifiers ->
             insert(char.toString())
         }
     }
+
+    val virtualString: String
+        get() = virtualContent.joinToString("\n")
+
+    val virtualContent: List<String>
+        get() = getTextLines(content)
+
+    val virtualLineChar: Pair<Int, Int>
+        get() = getLineAndCharIndex(virtualContent)
+
+    override fun start() = 0
+
+    override fun end() = content.length
+
+    override fun left(): Int {
+        return (cursorPos - 1).coerceAtLeast(0)
+    }
+
+    override fun right(): Int {
+        return (cursorPos + 1).coerceAtMost(virtualString.length)
+    }
+
+    override fun wordRight(): Int {
+        val after = afterCursor(content).split('\n', ' ')
+        return cursorPos + (after.firstOrNull()?.length?.coerceAtLeast(1) ?: 0)
+    }
+
+    override fun wordLeft(): Int {
+        val before = beforeCursor(content).split('\n', ' ').reversed()
+        return cursorPos - (before.firstOrNull()?.length?.coerceAtLeast(1) ?: 0)
+    }
+
+    override fun moveTo(index: Int) {
+        println("Attempting move to: $index")
+        val toIndex = index.coerceIn(0..content.length)
+        println("Actually moving to: $toIndex")
+        cursorPos = toIndex
+    }
+
+    override fun deleteTo(index: Int) {
+        var toIndex = min(index, content.length)
+        if (toIndex !in content.indices) {
+            toIndex = cursorPos
+        }
+        var indexes = listOf(toIndex, cursorPos).sorted()
+        content = content.replaceRange(indexes.first(), indexes.last(), "")
+        cursorPos = indexes.first()
+    }
+
+
 
     val mouseReactor = MouseReactor().apply {
         onClickDown = { relX, relY, button ->
@@ -156,8 +220,6 @@ open class KTextArea(
         val potentialContent = withInserted(newStr)
 
         val supposedLines = getNumLines(potentialContent)
-
-        println("Supposing: $supposedLines against ${height / lineHeight}")
 
         // Do not do an insertion if this brings it over the line limit
         if (supposedLines > (height / lineHeight)) {

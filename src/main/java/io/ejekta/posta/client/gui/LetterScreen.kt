@@ -36,7 +36,7 @@ class LetterScreen(
         //TODO("Not yet implemented")
     }
 
-    val textArea = KTextArea(200, 120)
+    val textArea = KTextArea(160, 120)
 
     val m = MouseReactor().apply {
         onDragStart = { _, _ ->
@@ -44,9 +44,6 @@ class LetterScreen(
         }
         onDragging = { x, y ->
             println("Drag! $x $y $dragPos")
-        }
-        onDragModify = { x, y ->
-            x to 0
         }
         onDragEnd = { _, _ ->
             println("Drag ended")
@@ -64,9 +61,19 @@ class LetterScreen(
             }
         }
 
-        offset(100, 100) {
-            widget(textArea)
+
+
+        areaCenteredInScreen(textArea.width, 0) {
+            offset(0, -118) {
+                widget(textArea)
+            }
+            textNoShadow(0, 5) {
+                addLiteral("POS: ${textArea.virtualLineChar} C: ${textArea.cursorPos}, VSL: ${textArea.virtualString.length}, SL: ${textArea.content.length}")
+                format(Formatting.BLACK)
+            }
         }
+
+
     }
 
     override fun onDrawForeground(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float) {
