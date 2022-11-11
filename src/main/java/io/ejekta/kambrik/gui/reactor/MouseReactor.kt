@@ -1,5 +1,7 @@
 package io.ejekta.kambrik.gui.reactor
 
+import io.ejekta.kambrik.math.Vec2i
+
 open class MouseReactor(
     defaultCanPass: Boolean = false,
 ) : EventReactor(defaultCanPass) {
@@ -9,8 +11,8 @@ open class MouseReactor(
 
     operator fun invoke(func: MouseReactor.() -> Unit) = apply(func)
 
-    open var dragPos = 0 to 0
-    open var mouseStartPos: Pair<Int, Int> = 0 to 0
+    open var dragPos = Vec2i.ZERO
+    open var mouseStartPos = Vec2i.ZERO
 
     private var lastMouseDraggedPos = 0 to 0
 
@@ -31,7 +33,7 @@ open class MouseReactor(
     /**
      * A callback that fires when we start dragging this widget.
      */
-    var onDragStart: (relX: Int, relY: Int) -> Unit = { _, _ ->
+    var onDragStart: (relVec: Vec2i) -> Unit = { _ ->
         // No-op
     }
 
@@ -39,12 +41,12 @@ open class MouseReactor(
      * A callback that fires while the widget is being dragged.
      * Unlike onMouseMoved, this fires even when not hovering the widget.
      */
-    var onDragging: (relX: Int, relY: Int) -> Unit = { _, _, ->
+    var onDragging: (relVec: Vec2i) -> Unit = { _ ->
         // No-op
     }
 
-    var onDragModify: (relX: Int, relY: Int) -> Pair<Int, Int> = { relX, relY ->
-        relX to relY
+    var onDragModify: (relVec: Vec2i) -> Vec2i = { relVec ->
+         relVec
     }
 
     /**
@@ -88,26 +90,26 @@ open class MouseReactor(
         // No-op
     }
 
-    fun doDragStart(relX: Int, relY: Int, absX: Int, absY: Int) {
+    fun doDragStart(relVec: Vec2i, absVec: Vec2i) {
         isDragging = true
-        mouseStartPos = (absX - dragPos.first) to (absY - dragPos.second)
-        onDragStart(relX, relY)
+        mouseStartPos = absVec
+        onDragStart(relVec)
     }
 
-    fun doDragging(absX: Int, absY: Int) {
-        val modified = onDragModify(
-            dragPos.first - absX + mouseStartPos.first,
-            dragPos.second - absY + mouseStartPos.first
-        )
-        val modX = absX + modified.first
-        val modY = absY + modified.second
-        dragPos = (modX - mouseStartPos.first) to (modY - mouseStartPos.second)
-        onDragging(modified.first, modified.second)
+    fun doDragging(absVec: Vec2i) {
+        val modified = onDragModify(dragPos - absVec + mouseStartPos)
+
+        //onDragging(absX, absY)
+
+        // amount to move (drag delta) =
+
+        //dragPos = (-mouseStartPos.first + absX to -mouseStartPos.second + absY)
+
     }
 
     fun doDragStop(relX: Int, relY: Int) {
         isDragging = false
-        mouseStartPos = 0 to 0
+        mouseStartPos = Vec2i.ZERO
         onDragEnd(relX, relY)
     }
 
