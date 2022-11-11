@@ -43,10 +43,10 @@ open class KListWidget<T>(
     private var lastSelectedIndex: Int? = null
 
     val reactor = MouseReactor().apply {
-        onClickDown = { relX, relY, button ->
+        onClickDown = { relVec, button ->
             val itemRenderIndex = when (orientation) {
-                Orientation.HORIZONTAL -> relX / itemWidth
-                Orientation.VERTICAL -> relY / itemHeight
+                Orientation.HORIZONTAL -> relVec.x / itemWidth
+                Orientation.VERTICAL -> relVec.y / itemHeight
             }
             val itemListIndex = shownRange.toList().getOrNull(itemRenderIndex)
 
@@ -68,7 +68,7 @@ open class KListWidget<T>(
             }
         }
 
-        onMouseScrolled = { _, _, amount ->
+        onMouseScrolled = { _, amount ->
             scrollBar?.scroll(-amount / max(1, items().size))
         }
     }

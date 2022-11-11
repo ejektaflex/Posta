@@ -8,6 +8,7 @@ import io.ejekta.kambrik.gui.reactor.MouseReactor
 import io.ejekta.kambrik.gui.DrawingScope
 import io.ejekta.kambrik.gui.reactor.EventReactor
 import io.ejekta.kambrik.gui.reactor.KeyReactor
+import io.ejekta.kambrik.math.Vec2i
 import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.player.PlayerInventory
@@ -76,7 +77,7 @@ abstract class KambrikHandledScreen<SH : ScreenHandler>(
     }
 
     fun kambrikGui(clearOnDraw: Boolean = false, func: DrawingScope.() -> Unit) = KambrikGui(
-        this, { x to y }
+        this, { Vec2i(x, y) }
     ) {
         if (clearOnDraw) {
             RenderSystem.setShaderColor(1f, 1f, 1f, 1f)

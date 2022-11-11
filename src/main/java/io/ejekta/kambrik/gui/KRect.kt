@@ -1,9 +1,13 @@
 package io.ejekta.kambrik.gui
 
-data class KRect(val x: Int, val y: Int, val w: Int, val h: Int) {
+import io.ejekta.kambrik.math.Vec2i
+
+data class KRect(val pos: Vec2i, val size: Vec2i) {
     fun isInside(ix: Int, iy: Int): Boolean {
-        return isInside(ix, iy, x, y, w, h)
+        return isInside(ix, iy, pos.x, pos.y, size.x, size.y)
     }
+
+
 
     companion object {
         fun isInside(ix: Int, iy: Int, x: Int, y: Int, w: Int, h: Int): Boolean {

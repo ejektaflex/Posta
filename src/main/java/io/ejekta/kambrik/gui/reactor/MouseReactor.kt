@@ -53,21 +53,21 @@ open class MouseReactor(
      * A callback that fires when we stop dragging this widget.
      * Note: Drag end does not always occur inside the widget bounds!
      */
-    var onDragEnd: (relX: Int, relY: Int) -> Unit = { _, _ ->
+    var onDragEnd: (relVec: Vec2i) -> Unit = { _ ->
         // No-op
     }
 
     /**
      * A callback that fires when the widget is clicked on.
      */
-    var onClickDown: (relX: Int, relY: Int, button: Int) -> Unit = { _, _, _ ->
+    var onClickDown: (relVec: Vec2i, button: Int) -> Unit = { _, _ ->
         // No-op
     }
 
     /**
      * A callback that fires when the mouse is released over the widget.
      */
-    var onClickUp: (relX: Int, relY: Int, button: Int) -> Unit = { _, _, _ ->
+    var onClickUp: (relVec: Vec2i, button: Int) -> Unit = { _, _ ->
         // No-op
     }
 
@@ -75,18 +75,18 @@ open class MouseReactor(
      * A callback that fires when the mouse is hovering over the widget.
      * Note: To draw while hovering, use `isHovered` inside the onDraw GUI DSL instead.
      */
-    var onHover: (relX: Int, relY: Int) -> Unit = { _, _ ->
+    var onHover: (relVec: Vec2i) -> Unit = { _ ->
         // No-op
     }
 
     /**
      * A callback that fires when the mouse moves while hovering the widget.
      */
-    var onMouseMoved: (relX: Int, relY: Int) -> Unit = { _, _ ->
+    var onMouseMoved: (relVec: Vec2i) -> Unit = { _ ->
         // No-op
     }
 
-    var onMouseScrolled: (relX: Int, relY: Int, amount: Double) -> Unit = { _, _, _ ->
+    var onMouseScrolled: (relVec: Vec2i, amount: Double) -> Unit = { _, _ ->
         // No-op
     }
 
@@ -107,20 +107,20 @@ open class MouseReactor(
 
     }
 
-    fun doDragStop(relX: Int, relY: Int) {
+    fun doDragStop(relVec: Vec2i) {
         isDragging = false
         mouseStartPos = Vec2i.ZERO
-        onDragEnd(relX, relY)
+        onDragEnd(relVec)
     }
 
-    fun doClickDown(relX: Int, relY: Int, button: Int) {
+    fun doClickDown(relVec: Vec2i, button: Int) {
         isHeld = true
-        onClickDown(relX, relY, button)
+        onClickDown(relVec, button)
     }
 
-    fun doClickUp(relX: Int, relY: Int, button: Int) {
+    fun doClickUp(relVec: Vec2i, button: Int) {
         isHeld = false
-        onClickUp(relX, relY, button)
+        onClickUp(relVec, button)
     }
 
 }

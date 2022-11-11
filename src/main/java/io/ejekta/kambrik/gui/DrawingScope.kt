@@ -5,6 +5,7 @@ import io.ejekta.kambrik.ext.fapi.textRenderer
 import io.ejekta.kambrik.gui.reactor.EventReactor
 import io.ejekta.kambrik.gui.reactor.KeyReactor
 import io.ejekta.kambrik.gui.reactor.MouseReactor
+import io.ejekta.kambrik.math.Vec2i
 import io.ejekta.kambrik.text.KambrikTextBuilder
 import io.ejekta.kambrik.text.textLiteral
 import net.minecraft.client.MinecraftClient
@@ -50,6 +51,8 @@ data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mous
         ctx.x -= x
         ctx.y -= y
     }
+
+    fun offset(vec2i: Vec2i, func: DrawingScope.() -> Unit) = offset(vec2i.x, vec2i.y, func)
 
     fun rect(x: Int, y: Int, w: Int, h: Int, color: Int, alpha: Int = 0xFF, func: DrawingScope.() -> Unit = {}) {
         offset(x, y) {
@@ -266,10 +269,10 @@ data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mous
         }
 
         fun reactWith(mouseReactor: MouseReactor) {
-            val boundsRect = KRect(ctx.absX(), ctx.absY(), w, h)
+            val boundsRect = KRect(ctx.absVec(), Vec2i(w, h))
             // Run hover event if hovering
             if (boundsRect.isInside(mouseX, mouseY)) {
-                mouseReactor.onHover(mouseX - boundsRect.x, mouseY - boundsRect.y)
+                mouseReactor.onHover(Vec2i(mouseX - boundsRect.pos.x, mouseY - boundsRect.pos.y))
             }
             // Add to stack for later event handling
             ctx.logic.boundsStack.add(0, mouseReactor to boundsRect)

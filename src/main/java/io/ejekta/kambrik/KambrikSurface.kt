@@ -5,6 +5,7 @@ import io.ejekta.kambrik.gui.KRect
 import io.ejekta.kambrik.gui.reactor.EventReactor
 import io.ejekta.kambrik.gui.reactor.KeyReactor
 import io.ejekta.kambrik.gui.reactor.MouseReactor
+import io.ejekta.kambrik.math.Vec2i
 import net.minecraft.client.gui.Element
 import net.minecraft.client.util.math.MatrixStack
 
@@ -41,10 +42,10 @@ interface KambrikSurface : Element {
         }
     }
 
-    private fun cycleMouseReactorsInBounds(mouseX: Double, mouseY: Double, func: (reactor: MouseReactor, rect: KRect, mX: Int, mY: Int) -> Unit) {
+    private fun cycleMouseReactorsInBounds(mouseX: Double, mouseY: Double, func: (reactor: MouseReactor, rect: KRect, mVec: Vec2i) -> Unit) {
         for (bounds in boundsStack) {
             if (bounds.second.isInside(mouseX.toInt(), mouseY.toInt())) {
-                func(bounds.first, bounds.second, mouseX.toInt(), mouseY.toInt())
+                func(bounds.first, bounds.second, Vec2i(mouseX.toInt(), mouseY.toInt()))
             }
         }
     }
@@ -62,10 +63,13 @@ interface KambrikSurface : Element {
             if (bounds.second.isInside(mouseX.toInt(), mouseY.toInt())) {
 
                 if (widget.canDragStart() && !widget.isDragging) {
-                    widget.doDragStart(mouseX.toInt() - rect.x, mouseY.toInt() - rect.y, mouseX.toInt(), mouseY.toInt())
+                    widget.doDragStart(
+                        Vec2i(mouseX.toInt() - rect.pos.x, mouseY.toInt() - rect.pos.y),
+                        Vec2i(mouseX.toInt(), mouseY.toInt())
+                    )
                 }
 
-                widget.doClickDown(mouseX.toInt() - rect.x, mouseY.toInt() - rect.y, button)
+                widget.doClickDown(Vec2i(mouseX.toInt() - rect.pos.x, mouseY.toInt() - rect.pos.y), button)
 
                 if (!widget.canPassThrough()) {
                     break // If we cannot continue down the bounds stack because there's no clickthrough, return
@@ -83,32 +87,32 @@ interface KambrikSurface : Element {
     override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
         cycleMouseReactors { mouseReact, rect ->
             if (mouseReact.canDragStop() && mouseReact.isDragging) {
-                mouseReact.doDragStop(mouseX.toInt() - rect.x, mouseY.toInt() - rect.y)
+                mouseReact.doDragStop(Vec2i(mouseX.toInt() - rect.pos.x, mouseY.toInt() - rect.pos.y))
             }
         }
-        cycleMouseReactorsInBounds(mouseX, mouseY) { widget, rect, mX, mY ->
-            widget.doClickUp(mX - rect.x, mY - rect.y, button)
+        cycleMouseReactorsInBounds(mouseX, mouseY) { widget, rect, mVec ->
+            widget.doClickUp(mVec - rect.pos, button)
         }
         return true
     }
 
     override fun mouseMoved(mouseX: Double, mouseY: Double) {
-        cycleMouseReactorsInBounds(mouseX, mouseY) { widget, rect, mX, mY ->
-            widget.onMouseMoved(mX - rect.x, mY - rect.y)
+        cycleMouseReactorsInBounds(mouseX, mouseY) { widget, rect, mVec ->
+            widget.onMouseMoved(mVec - rect.pos)
         }
         cycleMouseReactors { mouseReact, rect ->
             if (mouseReact.isDragging) {
-                mouseReact.doDragging(
+                mouseReact.doDragging(Vec2i(
                     mouseX.toInt(),
                     mouseY.toInt()
-                )
+                ))
             }
         }
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, amount: Double): Boolean {
-        cycleMouseReactorsInBounds(mouseX, mouseY) { widget, rect, mX, mY ->
-            widget.onMouseScrolled(mX - rect.x, mY - rect.y, amount)
+        cycleMouseReactorsInBounds(mouseX, mouseY) { widget, rect, mVec ->
+            widget.onMouseScrolled(mVec - rect.pos, amount)
         }
         return true
     }

@@ -118,21 +118,21 @@ open class KTextArea(
 //    }
 
     val mouseReactor = MouseReactor().apply {
-        onClickDown = { relX, relY, button ->
+        onClickDown = { relVec, button ->
             val lines = getTextLines(content)
-            val lineNum = relY / lineHeight
+            val lineNum = relVec.y / lineHeight
 
             // If it's a valid lineNum in our system
             if (lineNum < lines.size) {
                 val line = lines[lineNum]
                 val nextLine = lines.getOrNull(lineNum + 1)
                 val isSoftwrapped = !line.endsWith('\n') && nextLine != null
-                val trimmed = renderer.trimToWidth(line, relX)
+                val trimmed = renderer.trimToWidth(line, relVec.x)
 
                 cursorPos = lines.subList(0, lineNum).sumOf { it.length } // move to start of clicked line
 
                 // if past the end of the visual line
-                if (renderer.getWidth(line.trimEnd('\n')) <= relX) {
+                if (renderer.getWidth(line.trimEnd('\n')) <= relVec.x) {
                     cursorPos += line.trimEnd('\n').length + (if (isSoftwrapped) -1 else 0)
                 } else {
                     cursorPos += trimmed.length // otherwise just move to the end of string where cursor was
@@ -143,10 +143,10 @@ open class KTextArea(
                     charSize?.let {
                         val currentCaretWidth = renderer.getWidth(line.substring(0 until doot.second))
                         // If over halfway clicked through the char, go forward one char
-                        if (relX - currentCaretWidth >= it / 2) {
+                        if (relVec.x - currentCaretWidth >= it / 2) {
                             cursorPos++
                         }
-                        println("Char: $nextChar, Size: $it, Clicked At: $relX, Trimmed to: ${renderer.getWidth(line.substring(0 until doot.second))}")
+                        println("Char: $nextChar, Size: $it, Clicked At: ${relVec.x}, Trimmed to: ${renderer.getWidth(line.substring(0 until doot.second))}")
                     }
                 }
             } else {

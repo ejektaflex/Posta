@@ -39,13 +39,13 @@ class LetterScreen(
     val textArea = KTextArea(160, 110)
 
     val m = MouseReactor().apply {
-        onDragStart = { _, _ ->
+        onDragStart = { _ ->
             println("Drag started")
         }
-        onDragging = { x, y ->
+        onDragging = { _ ->
             println("Drag! $x $y $dragPos")
         }
-        onDragEnd = { _, _ ->
+        onDragEnd = { _ ->
             println("Drag ended")
         }
     }
@@ -53,7 +53,7 @@ class LetterScreen(
     val fgGui = kambrikGui {
 
         offset(10, 10) {
-            offset(m.dragPos.first, m.dragPos.second) {
+            offset(m.dragPos) {
                 area(25, 25) {
                     rect(Formatting.RED.colorValue!!)
                     reactWith(m)
