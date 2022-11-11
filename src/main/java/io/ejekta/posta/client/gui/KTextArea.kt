@@ -48,7 +48,7 @@ open class KTextArea(
                 }
                 InputUtil.GLFW_KEY_ENTER -> {
                     insert("\n")
-                    cursorPos++
+                    //cursorPos++
                 }
                 InputUtil.GLFW_KEY_BACKSPACE -> deleteTo(left())
             }
@@ -112,8 +112,11 @@ open class KTextArea(
         onClickDown = { relX, relY, button ->
             val lines = getTextLines(content)
             val lineNum = relY / lineHeight
+            println("Clicked on TE LineNum: $lineNum")
+
+            // If it's a valid lineNum in our system
             if (lineNum < lines.size) {
-                val line = lines[lineNum]
+                val line = lines[lineNum].dropLastWhile { it == '\n' } // Trim whitespace from the end
                 val trimmed = renderer.trimToWidth(line, relX)
 
                 // How much extra to add for current line
@@ -121,6 +124,7 @@ open class KTextArea(
 
                 // If there's another character after it, pick whichever offset is closer to click pos
                 if (line.length > trimmed.length) {
+                    println("BUMPING TRIM OFFSET: ${line.length}")
                     trimOffset = listOf(trimmed.indices, 0..trimmed.length).map {
                         line.substring(it)
                     }.minByOrNull {
@@ -129,7 +133,14 @@ open class KTextArea(
                 }
 
                 val prevLines = lines.subList(0, lineNum)
+
+                println("Should be going to.. ${prevLines.sumOf { it.length }} w/o offset (off $trimOffset)")
+
                 cursorPos = prevLines.sumOf { it.length } + trimOffset
+
+                println("Went to $cursorPos.")
+            } else {
+                moveTo(virtualString.length)
             }
         }
     }

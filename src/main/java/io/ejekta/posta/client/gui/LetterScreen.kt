@@ -64,7 +64,7 @@ class LetterScreen(
 
 
         areaCenteredInScreen(textArea.width, 0) {
-            offset(0, -118) {
+            offset(0, -backgroundHeight/2 + 5) {
                 widget(textArea)
             }
             textNoShadow(0, 5) {
