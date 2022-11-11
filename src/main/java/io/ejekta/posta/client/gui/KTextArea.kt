@@ -54,6 +54,7 @@ open class KTextArea(
             }
         }
         onType = { char, modifiers ->
+            println("")
             insert(char.toString())
         }
     }
@@ -101,7 +102,7 @@ open class KTextArea(
         if (toIndex !in content.indices) {
             toIndex = cursorPos
         }
-        var indexes = listOf(toIndex, cursorPos).sorted()
+        val indexes = listOf(toIndex, cursorPos).sorted()
         content = content.replaceRange(indexes.first(), indexes.last(), "")
         cursorPos = indexes.first()
     }
@@ -116,11 +117,19 @@ open class KTextArea(
 
             // If it's a valid lineNum in our system
             if (lineNum < lines.size) {
-                val line = lines[lineNum].dropLastWhile { it == '\n' } // Trim whitespace from the end
+                var line = lines[lineNum].trimEnd()
                 val trimmed = renderer.trimToWidth(line, relX)
+
+
+
+
+                println("LINE: $line (${line.length}) || TR: $trimmed (${trimmed.length})")
+                println("Line ends at: ${line.trimEnd().length}")
+
 
                 // How much extra to add for current line
                 var trimOffset = trimmed.length
+
 
                 // If there's another character after it, pick whichever offset is closer to click pos
                 if (line.length > trimmed.length) {
