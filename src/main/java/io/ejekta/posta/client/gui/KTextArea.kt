@@ -36,7 +36,7 @@ open class KTextArea(
         get() = getTextLines(content)
 
     val virtualLineChar: Pair<Int, Int>
-        get() = getLineAndCharIndex(virtualContent)
+        get() = getLineAndCharIndex(cursorPos, virtualContent)
 
     override fun start() = 0
 
@@ -100,8 +100,8 @@ open class KTextArea(
         return list
     }
 
-    private fun getLineAndCharIndex(lines: List<String>): Pair<Int, Int> {
-        var target = cursorPos
+    private fun getLineAndCharIndex(fromPos: Int, lines: List<String>): Pair<Int, Int> {
+        var target = fromPos
         for (i in lines.indices) {
             val line = lines[i]
             if (target >= line.length) {
@@ -116,7 +116,7 @@ open class KTextArea(
     fun getCursorLineAndWidth(): Pair<Int, Int> {
         val allLines = getTextLines(content)
 
-        val res = getLineAndCharIndex(allLines)
+        val res = getLineAndCharIndex(cursorPos, allLines)
 
         if (res.first in allLines.indices) {
             return if (res.second != 0) {
@@ -241,16 +241,17 @@ open class KTextArea(
             } else {
                 returnCaret += trimmed.length // otherwise just move to the end of string where cursor was
                 // Implement "nudging" - if clicked on the right side of a character, nudge the cursor right
-                val doot = getLineAndCharIndex(lines)
+                val doot = getLineAndCharIndex(returnCaret, lines)
                 val nextChar = line.getOrNull(doot.second)
                 val charSize = nextChar?.let { renderer.getWidth(it.toString()) }
                 charSize?.let {
                     val currentCaretWidth = renderer.getWidth(line.substring(0 until doot.second))
                     // If over halfway clicked through the char, go forward one char
-                    if (relVec.x - currentCaretWidth >= it / 2) {
+                    println("Ret: $returnCaret")
+                    if (relVec.x - currentCaretWidth > it / 2) {
                         returnCaret++
                     }
-                    //println("Char: $nextChar, Size: $it, Clicked At: ${relVec.x}, Trimmed to: ${renderer.getWidth(line.substring(0 until doot.second))}")
+                    println("Char: $nextChar, Size: $it, Clicked At: ${relVec.x}, Trimmed to: ${renderer.getWidth(line.substring(0 until doot.second))}")
                 }
             }
         } else {
