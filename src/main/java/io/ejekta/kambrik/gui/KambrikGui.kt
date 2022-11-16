@@ -29,7 +29,7 @@ class KambrikGui(
         val dsl = DrawingScope(this, matrices, mouseX, mouseY, delta, true).draw(toDraw)
     }
 
-    fun pushModal(dsl: DrawingScope.() -> Unit) = logic.modalStack.add(dsl)
+    //fun pushModal(dsl: DrawingScope.() -> Unit) = logic.modalStack.add(dsl)
 
     fun absX(relX: Int = 0) = x + coordFunc().x + relX
 

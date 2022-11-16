@@ -1,4 +1,4 @@
-package io.ejekta.kambrik.gui.widgets
+package io.ejekta.kambrik.gui.widgets.scrollbar
 
 import io.ejekta.kambrik.gui.DrawingScope
 import io.ejekta.kambrik.gui.KSpriteGrid

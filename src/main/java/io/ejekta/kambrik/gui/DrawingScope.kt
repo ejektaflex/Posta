@@ -23,19 +23,23 @@ import net.minecraft.text.OrderedText
 import net.minecraft.text.Text
 import kotlin.math.max
 
+internal typealias DrawingDsl = DrawingScope.() -> Unit
+internal typealias AreaDsl = DrawingScope.AreaScope.() -> Unit
+internal typealias TextDsl = KambrikTextBuilder<MutableText>.() -> Unit
+
 data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mouseX: Int, val mouseY: Int, val delta: Float?, val drawDebug: Boolean) {
 
-    private val frameDeferredTasks = mutableListOf<DrawingScope.() -> Unit>()
+    private val frameDeferredTasks = mutableListOf<DrawingDsl>()
 
-    operator fun invoke(func: DrawingScope.() -> Unit) = apply(func)
+    operator fun invoke(func: DrawingDsl) = apply(func)
 
-    fun draw(func: DrawingScope.() -> Unit): DrawingScope {
+    fun draw(func: DrawingDsl): DrawingScope {
         apply(func)
         doLateDeferral()
         return this
     }
 
-    private fun defer(func: DrawingScope.() -> Unit) {
+    private fun defer(func: DrawingDsl) {
         frameDeferredTasks.add(func)
     }
 
@@ -44,7 +48,7 @@ data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mous
         frameDeferredTasks.clear()
     }
 
-    fun offset(x: Int, y: Int, func: DrawingScope.() -> Unit) {
+    fun offset(x: Int, y: Int, func: DrawingDsl) {
         ctx.x += x
         ctx.y += y
         apply(func)
@@ -52,9 +56,9 @@ data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mous
         ctx.y -= y
     }
 
-    fun offset(vec2i: Vec2i, func: DrawingScope.() -> Unit) = offset(vec2i.x, vec2i.y, func)
+    fun offset(vec2i: Vec2i, func: DrawingDsl) = offset(vec2i.x, vec2i.y, func)
 
-    fun rect(x: Int, y: Int, w: Int, h: Int, color: Int, alpha: Int = 0xFF, func: DrawingScope.() -> Unit = {}) {
+    fun rect(x: Int, y: Int, w: Int, h: Int, color: Int, alpha: Int = 0xFF, func: DrawingDsl = {}) {
         offset(x, y) {
             val sx = ctx.absX()
             val sy = ctx.absY()
@@ -63,7 +67,7 @@ data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mous
         }
     }
 
-    fun rect(w: Int, h: Int, color: Int, alpha: Int = 0xFF, func: DrawingScope.() -> Unit = {}) {
+    fun rect(w: Int, h: Int, color: Int, alpha: Int = 0xFF, func: DrawingDsl = {}) {
         rect(0, 0, w, h, color, alpha, func)
     }
 
@@ -87,13 +91,13 @@ data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mous
         }
     }
 
-    fun onHover(x: Int, y: Int, w: Int, h: Int, func: DrawingScope.() -> Unit) {
+    fun onHover(x: Int, y: Int, w: Int, h: Int, func: DrawingDsl) {
         if (KRect.isInside(mouseX, mouseY, ctx.absX(x), ctx.absY(y), w, h)) {
             apply(func)
         }
     }
 
-    fun onHover(w: Int, h: Int, func: DrawingScope.() -> Unit) {
+    fun onHover(w: Int, h: Int, func: DrawingDsl) {
         onHover(0, 0, w, h, func)
     }
 
@@ -108,7 +112,7 @@ data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mous
         }
     }
 
-    fun tooltip(func: KambrikTextBuilder<MutableText>.() -> Unit) {
+    fun tooltip(func: TextDsl) {
         tooltip(listOf(textLiteral("", func)))
     }
 
@@ -122,7 +126,7 @@ data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mous
 
     fun text(x: Int, y: Int, string: String) = text(x, y, Text.literal(string))
 
-    fun text(x: Int = 0, y: Int = 0, textDsl: KambrikTextBuilder<MutableText>.() -> Unit) {
+    fun text(x: Int = 0, y: Int = 0, textDsl: TextDsl) {
         text(x, y, textLiteral("", textDsl))
     }
 
@@ -130,7 +134,7 @@ data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mous
         ctx.screen.textRenderer.draw(matrices, text, ctx.absX(x).toFloat(), ctx.absY(y).toFloat(), 0xFFFFFF)
     }
 
-    fun textNoShadow(x: Int = 0, y: Int = 0, textDsl: KambrikTextBuilder<MutableText>.() -> Unit) {
+    fun textNoShadow(x: Int = 0, y: Int = 0, textDsl: TextDsl) {
         textNoShadow(x, y, textLiteral("", textDsl))
     }
 
@@ -145,7 +149,7 @@ data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mous
         )
     }
 
-    fun textCentered(x: Int = 0, y: Int = 0, textDsl: KambrikTextBuilder<MutableText>.() -> Unit) {
+    fun textCentered(x: Int = 0, y: Int = 0, textDsl: TextDsl) {
         textCentered(x, y, textLiteral("", textDsl))
     }
 
@@ -169,7 +173,7 @@ data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mous
         immediate.draw()
     }
 
-    fun sprite(sprite: KSpriteGrid.Sprite, x: Int = 0, y: Int = 0, w: Int = sprite.width, h: Int = sprite.height, func: (AreaScope.() -> Unit)? = null) {
+    fun sprite(sprite: KSpriteGrid.Sprite, x: Int = 0, y: Int = 0, w: Int = sprite.width, h: Int = sprite.height, func: AreaDsl? = null) {
         sprite.draw(
             ctx.screen,
             matrices,
@@ -185,19 +189,19 @@ data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mous
         }
     }
 
-    fun spriteCenteredInScreen(sprite: KSpriteGrid.Sprite, func: AreaScope.() -> Unit) {
+    fun spriteCenteredInScreen(sprite: KSpriteGrid.Sprite, func: AreaDsl) {
         offset(ctx.screen.width / 2 - sprite.width / 2, ctx.screen.height / 2 - sprite.height / 2) {
             sprite(sprite)
         }
     }
 
-    fun areaCenteredInScreen(w: Int, h: Int, func: AreaScope.() -> Unit) {
+    fun areaCenteredInScreen(w: Int, h: Int, func: AreaDsl) {
         offset(ctx.screen.width / 2 - w / 2, ctx.screen.height / 2 - h / 2) {
             area(w, h, func)
         }
     }
 
-    fun widgetCenteredInScreen(widget: KWidget, func: AreaScope.() -> Unit = { } ) {
+    fun widgetCenteredInScreen(widget: KWidget, func: AreaDsl = {} ) {
         areaCenteredInScreen(widget.width, widget.height, func)
     }
 
@@ -236,11 +240,11 @@ data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mous
                 && mouseY >= ctx.absY(startY) && mouseY <= ctx.absY(startY + h)
     }
 
-    fun area(w: Int, h: Int, func: AreaScope.() -> Unit) {
+    fun area(w: Int, h: Int, func: AreaDsl) {
         areaDsl.adjusted(w, h, func)
     }
 
-    fun area(relX: Int, relY: Int, w: Int, h: Int, func: AreaScope.() -> Unit) {
+    fun area(relX: Int, relY: Int, w: Int, h: Int, func: AreaDsl) {
         offset(relX, relY) {
             area(w, h, func)
         }
@@ -253,12 +257,12 @@ data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mous
         val dsl: DrawingScope
             get() = this@DrawingScope
 
-        operator fun invoke(dsl: AreaScope.() -> Unit) = apply(dsl)
+        operator fun invoke(dsl: AreaDsl) = apply(dsl)
 
         val isHovered: Boolean
             get() = isHovered(w, h)
 
-        internal fun adjusted(newW: Int, newH: Int, func: AreaScope.() -> Unit) {
+        internal fun adjusted(newW: Int, newH: Int, func: AreaDsl) {
             val oldW = w
             val oldH = h
             w = newW
@@ -291,11 +295,11 @@ data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mous
             }
         }
 
-        fun rect(color: Int, alpha: Int = 0xFF, func: DrawingScope.() -> Unit = {}) {
+        fun rect(color: Int, alpha: Int = 0xFF, func: DrawingDsl = {}) {
             rect(w, h, color, alpha, func)
         }
 
-        fun onHover(func: DrawingScope.() -> Unit) {
+        fun onHover(func: DrawingDsl) {
             onHover(w, h, func)
         }
 
@@ -303,7 +307,7 @@ data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mous
             textCentered(w / 2, y, text)
         }
 
-        fun widgetCentered(widget: KWidget, func: DrawingScope.() -> Unit = {}) {
+        fun widgetCentered(widget: KWidget, func: DrawingDsl = {}) {
             offset(w / 2 - widget.width / 2, h / 2 - widget.height / 2) {
                 widget(widget)
                 apply(func)

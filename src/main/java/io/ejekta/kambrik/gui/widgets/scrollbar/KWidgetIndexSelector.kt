@@ -1,4 +1,4 @@
-package io.ejekta.kambrik.gui.widgets
+package io.ejekta.kambrik.gui.widgets.scrollbar
 
 import kotlin.math.min
 

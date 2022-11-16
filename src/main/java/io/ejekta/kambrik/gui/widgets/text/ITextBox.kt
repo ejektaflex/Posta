@@ -1,4 +1,4 @@
-package io.ejekta.posta.client.gui
+package io.ejekta.kambrik.gui.widgets.text
 
 import io.ejekta.kambrik.gui.reactor.MouseReactor
 

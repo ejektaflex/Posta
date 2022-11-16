@@ -25,7 +25,7 @@ class LetterItem : Item(
 ) {
 
     class ScreenFact(stack: ItemStack) : ExtendedScreenHandlerFactory {
-        override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler? {
+        override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler {
             return LetterScreenHandler(syncId, inv, SimpleInventory())
         }
 
