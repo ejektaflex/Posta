@@ -1,8 +1,7 @@
 package io.ejekta.kambrik.gui.widgets
 
 import io.ejekta.kambrik.gui.reactor.MouseReactor
-import io.ejekta.kambrik.gui.DrawingScope
-import io.ejekta.kambrik.gui.KWidget
+import io.ejekta.kambrik.gui.drawing.DrawingScope
 import io.ejekta.kambrik.gui.widgets.scrollbar.KScrollbar
 import net.minecraft.client.gui.screen.Screen
 import kotlin.math.max

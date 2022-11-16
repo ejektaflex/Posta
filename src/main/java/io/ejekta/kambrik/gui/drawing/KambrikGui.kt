@@ -1,4 +1,4 @@
-package io.ejekta.kambrik.gui
+package io.ejekta.kambrik.gui.drawing
 
 import io.ejekta.kambrik.KambrikSurface
 import io.ejekta.kambrik.math.Vec2i
@@ -6,7 +6,6 @@ import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.EntityType
 import net.minecraft.entity.LivingEntity
-
 
 class KambrikGui(
     val screen: Screen,

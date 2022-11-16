@@ -1,11 +1,14 @@
 package io.ejekta.posta
 
+import io.ejekta.kambrik.ext.register
 import io.ejekta.kambrik.registration.KambrikAutoRegistrar
 import io.ejekta.posta.letter.LetterItem
 import io.ejekta.posta.letter.LetterScreenHandler
 import io.ejekta.posta.mailbox.MailboxBlock
 import io.ejekta.posta.mailbox.MailboxBlockEntity
 import io.ejekta.posta.mailbox.MailboxScreenHandler
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType
 import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry
 import net.minecraft.item.BlockItem
 import net.minecraft.item.Item
@@ -13,10 +16,9 @@ import net.minecraft.item.ItemGroup
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.ScreenHandlerType
 import net.minecraft.util.Identifier
+import net.minecraft.util.registry.Registry
 
 object PostaContent : KambrikAutoRegistrar {
-
-    override fun manualRegister() { /* nah */ }
 
     val LETTER = "letter" forItem LetterItem()
 
@@ -28,19 +30,13 @@ object PostaContent : KambrikAutoRegistrar {
         MailboxBlockEntity(pos, state)
     }
 
-    val MAILBOX_SCREEN_HANDLER = forExtendedScreen(
-        Identifier(PostaMod.ID, "mailbox_screen"),
+    val MAILBOX_SCREEN_HANDLER = "mailbox_screen_handler" forExtendedScreen(
         ::MailboxScreenHandler
     )
 
-    val LETTER_SCREEN_HANDLER = forExtendedScreen(
-        Identifier(PostaMod.ID, "letter_screen"),
+    val LETTER_SCREEN_HANDLER = "letter_screen_handler" forExtendedScreen(
         ::LetterScreenHandler
     )
-
-    fun <T : ScreenHandler> forScreen(id: Identifier, factory: ScreenHandlerRegistry.SimpleClientHandlerFactory<T>): ScreenHandlerType<T>? {
-        return ScreenHandlerRegistry.registerSimple(id, factory)
-    }
 
 
 }

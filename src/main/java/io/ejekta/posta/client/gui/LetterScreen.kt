@@ -3,8 +3,8 @@ package io.ejekta.posta.client.gui
 import io.ejekta.kambrik.KambrikHandledScreen
 import io.ejekta.kambrik.ext.client.drawSimpleCenteredImage
 import io.ejekta.kambrik.gui.reactor.MouseReactor
+import io.ejekta.kambrik.gui.widgets.text.KTextArea
 import io.ejekta.posta.PostaMod
-import net.minecraft.client.gui.widget.EditBoxWidget
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.screen.ScreenHandler

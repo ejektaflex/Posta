@@ -1,5 +1,6 @@
-package io.ejekta.kambrik.gui
+package io.ejekta.kambrik.gui.widgets
 
+import io.ejekta.kambrik.gui.drawing.DrawingScope
 import io.ejekta.kambrik.text.textLiteral
 
 interface KWidget {

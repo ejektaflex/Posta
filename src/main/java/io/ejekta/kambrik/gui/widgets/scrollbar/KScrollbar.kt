@@ -1,8 +1,8 @@
 package io.ejekta.kambrik.gui.widgets.scrollbar
 
-import io.ejekta.kambrik.gui.DrawingScope
-import io.ejekta.kambrik.gui.KSpriteGrid
-import io.ejekta.kambrik.gui.KWidget
+import io.ejekta.kambrik.gui.drawing.DrawingScope
+import io.ejekta.kambrik.gui.drawing.KSpriteGrid
+import io.ejekta.kambrik.gui.widgets.KWidget
 import io.ejekta.kambrik.gui.reactor.MouseReactor
 import kotlin.math.roundToInt
 

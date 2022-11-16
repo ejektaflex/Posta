@@ -1,9 +1,9 @@
 package io.ejekta.kambrik
 
 import com.mojang.blaze3d.systems.RenderSystem
-import io.ejekta.kambrik.gui.KambrikGui
-import io.ejekta.kambrik.gui.DrawingScope
-import io.ejekta.kambrik.gui.KRect
+import io.ejekta.kambrik.gui.drawing.DrawingScope
+import io.ejekta.kambrik.gui.drawing.KRect
+import io.ejekta.kambrik.gui.drawing.KambrikGui
 import io.ejekta.kambrik.gui.reactor.EventReactor
 import io.ejekta.kambrik.gui.reactor.KeyReactor
 import io.ejekta.kambrik.gui.reactor.MouseReactor

@@ -1,7 +1,8 @@
-package io.ejekta.kambrik.gui
+package io.ejekta.kambrik.gui.drawing
 
 import io.ejekta.kambrik.ext.fapi.itemRenderer
 import io.ejekta.kambrik.ext.fapi.textRenderer
+import io.ejekta.kambrik.gui.widgets.KWidget
 import io.ejekta.kambrik.gui.reactor.EventReactor
 import io.ejekta.kambrik.gui.reactor.KeyReactor
 import io.ejekta.kambrik.gui.reactor.MouseReactor
@@ -62,7 +63,7 @@ data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mous
         offset(x, y) {
             val sx = ctx.absX()
             val sy = ctx.absY()
-            DrawableHelper.fill(matrices, sx, sy, sx + w, sy + h, (alpha shl 24) + color)
+            net.minecraft.client.gui.DrawableHelper.fill(matrices, sx, sy, sx + w, sy + h, (alpha shl 24) + color)
             apply(func)
         }
     }

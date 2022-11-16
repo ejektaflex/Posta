@@ -1,7 +1,7 @@
 package io.ejekta.kambrik.gui.widgets.scrollbar
 
-import io.ejekta.kambrik.gui.DrawingScope
-import io.ejekta.kambrik.gui.KSpriteGrid
+import io.ejekta.kambrik.gui.drawing.DrawingScope
+import io.ejekta.kambrik.gui.drawing.KSpriteGrid
 
 class KScrollbarVertical(
     scrollHeight: Int,

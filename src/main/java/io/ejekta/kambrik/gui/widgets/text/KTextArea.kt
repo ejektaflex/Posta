@@ -1,7 +1,7 @@
 package io.ejekta.kambrik.gui.widgets.text
 
-import io.ejekta.kambrik.gui.DrawingScope
-import io.ejekta.kambrik.gui.KWidget
+import io.ejekta.kambrik.gui.drawing.DrawingScope
+import io.ejekta.kambrik.gui.widgets.KWidget
 import io.ejekta.kambrik.gui.reactor.KeyReactor
 import io.ejekta.kambrik.gui.reactor.MouseReactor
 import io.ejekta.kambrik.math.Vec2i

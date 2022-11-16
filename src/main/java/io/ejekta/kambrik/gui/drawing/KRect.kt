@@ -1,4 +1,4 @@
-package io.ejekta.kambrik.gui
+package io.ejekta.kambrik.gui.drawing
 
 import io.ejekta.kambrik.math.Vec2i
 
