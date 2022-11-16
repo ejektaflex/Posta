@@ -14,10 +14,11 @@ interface KambrikSurface : Element {
     val keyStack: MutableList<KeyReactor>
     val areaClickStack: MutableList<Pair<() -> Unit, KRect>> // Currently unused
     val modalStack: MutableList<DrawingDsl>
-    fun onDrawBackground(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float)
-    fun onDrawForeground(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float)
+    fun onDrawBackground(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float) {}
+    fun onDrawForeground(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float) {}
 
     val focused: MutableList<EventReactor>
+
 
     fun isFocused(reactor: EventReactor): Boolean {
         return reactor in focused

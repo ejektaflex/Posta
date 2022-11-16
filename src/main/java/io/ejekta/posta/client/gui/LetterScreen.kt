@@ -1,7 +1,6 @@
 package io.ejekta.posta.client.gui
 
 import io.ejekta.kambrik.KambrikHandledScreen
-import io.ejekta.kambrik.ext.client.drawSimpleCenteredImage
 import io.ejekta.kambrik.gui.reactor.MouseReactor
 import io.ejekta.kambrik.gui.widgets.text.KTextArea
 import io.ejekta.posta.PostaMod
@@ -20,22 +19,9 @@ class LetterScreen(
     handler, inventory, title
 ) {
 
-    init {
-        backgroundWidth = 176
-        backgroundHeight = 246
-    }
+    override fun init() { /* No-op */ }
 
-    override fun init() {
-
-    }
-
-    override fun handledScreenTick() {
-        //
-    }
-
-    override fun onDrawBackground(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float) {
-        //TODO("Not yet implemented")
-    }
+    private val TEXTURE = Identifier(PostaMod.ID, "textures/letter_bg.png")
 
     val textArea = KTextArea(160, 110)
 
@@ -43,15 +29,12 @@ class LetterScreen(
         onDragStart = { _ ->
             println("Drag started")
         }
-//        onDragging = { _ ->
-//            println("Drag! $x $y $dragPos")
-//        }
         onDragEnd = { _ ->
             println("Drag ended")
         }
     }
 
-    val fgGui = kambrikGui {
+    val kgui = kambrikGui {
 
         offset(10, 10) {
             offset(m.dragPos) {
@@ -62,10 +45,8 @@ class LetterScreen(
             }
         }
 
-
-
         areaCenteredInScreen(textArea.width, 0) {
-            offset(0, -backgroundHeight/2 + 5) {
+            offset(0, -backgroundHeight / 2 + 5) {
                 widget(textArea)
             }
             textNoShadow(0, -5) {
@@ -78,24 +59,16 @@ class LetterScreen(
             }
         }
 
+    }
 
+    init {
+        backgroundWidth = 176
+        backgroundHeight = 246
+        kgui.screen = this
     }
 
     override fun onDrawForeground(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float) {
-        fgGui.draw(matrices, mouseX, mouseY, delta)
-    }
-
-    override fun drawBackground(matrices: MatrixStack, delta: Float, mouseX: Int, mouseY: Int) {
-        drawSimpleCenteredImage(matrices, TEXTURE, backgroundWidth, backgroundHeight)
-    }
-
-    override fun render(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float) {
-        super.render(matrices, mouseX, mouseY, delta)
-        //textTwo.render(matrices, mouseX, mouseY, delta)
-    }
-
-    companion object {
-        private val TEXTURE = Identifier(PostaMod.ID, "textures/letter_bg.png")
+        kgui.draw(matrices, mouseX, mouseY, delta)
     }
 
 }

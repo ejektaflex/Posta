@@ -280,11 +280,11 @@ data class DrawingScope(val ctx: KambrikGui, val matrices: MatrixStack, val mous
                 mouseReactor.onHover(Vec2i(mouseX - boundsRect.pos.x, mouseY - boundsRect.pos.y))
             }
             // Add to stack for later event handling
-            ctx.logic.boundsStack.add(0, mouseReactor to boundsRect)
+            ctx.surface.boundsStack.add(0, mouseReactor to boundsRect)
         }
 
         fun reactWith(keyReactor: KeyReactor) {
-            ctx.logic.keyStack.add(0, keyReactor)
+            ctx.surface.keyStack.add(0, keyReactor)
         }
 
         fun reactWith(vararg reactors: EventReactor) {
